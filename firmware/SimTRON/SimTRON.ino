@@ -23,6 +23,7 @@
 #define SMS_HEAD_TIME 4
 
 // Channels control
+int channelToAddress[] { 4, 6, 7, 5, 2, 1, 0, 3};
 int channelEnablePin[] { 6, 8, 9, 7, 4, 3, 2, 5};
 int enabledChannels[] { false, false, false, false, false, false, false, false};
 int selectedChannel = 0;
@@ -110,6 +111,7 @@ void loop() {
       deleteSmsAtIndex(FIRST_SMS_INDEX);
     }
   }
+  
   selectNextChannel();
 }
 
@@ -197,9 +199,9 @@ void fillSmsHeadPart(int headPartId, char* headPart, SmsData* smsData) {
 
 void printSmsJson(SmsData* smsData) {
   Serial.print(F("{\"type\":\"sms\""));
-  Serial.print(F(", \"channel\":\""));
+  Serial.print(F(", \"channel\": "));
   Serial.print(smsData->channel);
-  Serial.print(F("\", \"sender\":\""));
+  Serial.print(F(", \"sender\":\""));
   Serial.print(smsData->sender);
   Serial.print(F("\", \"datetime\":\""));
   Serial.print(smsData->date);
@@ -277,9 +279,10 @@ void selectNextChannel() {
 }
 
 void selectChannel(int channel) {
-  digitalWrite(CHANNEL_S0, bitRead(channel,0));
-  digitalWrite(CHANNEL_S1, bitRead(channel,1));
-  digitalWrite(CHANNEL_S2, bitRead(channel,2));
+  int channelAddress = channelToAddress[channel];
+  digitalWrite(CHANNEL_S0, bitRead(channelAddress,0));
+  digitalWrite(CHANNEL_S1, bitRead(channelAddress,1));
+  digitalWrite(CHANNEL_S2, bitRead(channelAddress,2));
 
   selectedChannel = channel;
   delay(SWITCH_CHANNEL_DELAY);
