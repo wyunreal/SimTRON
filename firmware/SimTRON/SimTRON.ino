@@ -198,36 +198,38 @@ void fillSmsHeadPart(int headPartId, char* headPart, SmsData* smsData) {
 }
 
 void printSmsJson(SmsData* smsData) {
-  Serial.print(F("{\"type\":\"sms\""));
+  Serial.print(F("{\"type\": \"sms\""));
   Serial.print(F(", \"channel\": "));
   Serial.print(smsData->channel);
-  Serial.print(F(", \"sender\":\""));
+  Serial.print(F(", \"sender\": \""));
   Serial.print(smsData->sender);
-  Serial.print(F("\", \"datetime\":\""));
+  Serial.print(F("\", \"datetime\": \""));
   Serial.print(smsData->date);
   Serial.print(F(","));
   Serial.print(smsData->time);
-  Serial.print(F("\", \"body\":\""));
+  Serial.print(F("\", \"body\": \""));
   Serial.print(smsData->body);
   Serial.println(F("\"}"));
 }
 
 
 void printChannelStatusJson(ChannelStatusData* statusData) {
-  Serial.print(F("{\"type\":\"status\""));
-  Serial.print(F("\", channel\":\""));
+  Serial.print(F("{\"type\": \"status\""));
+  Serial.print(F(", \"channel\": "));
   Serial.print(statusData->channel);
-  Serial.print(F("\", \"isEnabled\":\""));
+  Serial.print(F(", \"isEnabled\": "));
   Serial.print(statusData->isEnabled);
+  Serial.print(F(", \"status\": \""));
+  Serial.print(statusData->isEnabled ? "Sim enabled" : "Sim disabled");
   Serial.println(F("\"}"));
 }
 
 void printBootingUpMessage() {
-  Serial.println(F("{\"type\":\"booting\", \"body\":\"Booting Up ...\"}"));
+  Serial.println(F("{\"type\": \"booting\", \"body\": \"Booting Up ...\"}"));
 }
 
 void printBootCompleteMessage() {
-  Serial.println(F("{\"type\":\"booting\", \"body\":\"System ready...\"}"));
+  Serial.println(F("{\"type\": \"booting\", \"body\": \"System ready...\"}"));
 }
 
 void deleteSmsAtIndex(int index) {
