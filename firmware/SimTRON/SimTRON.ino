@@ -6,16 +6,16 @@
 #define TX 11
 
 #define CHANNEL_COUNT 8
-#define CHANNEL_S0 A0
-#define CHANNEL_S1 A1
-#define CHANNEL_S2 A2
+#define CHANNEL_S0 A1
+#define CHANNEL_S1 A2
+#define CHANNEL_S2 A3
 #define SWITCH_CHANNEL_DELAY 50
 
+#define MODEM_RESPONSE_MAX_CHARS 750
 #define MAX_READ_RETRIES 25
 #define NO_DATA_ON_READ_DELAY 10
 
 #define FIRST_SMS_INDEX 1
-
 #define SMS_PARSER_STATE_HEAD 1
 #define SMS_PARSER_STATE_BODY 2
 #define SMS_HEAD_SENDER 2
@@ -23,36 +23,33 @@
 #define SMS_HEAD_TIME 4
 
 // Channels control
-int channelToAddress[] { 4, 6, 7, 5, 2, 1, 0, 3};
-int channelEnablePin[] { 6, 8, 9, 7, 4, 3, 2, 5};
-int enabledChannels[] { false, false, false, false, false, false, false, false};
-int selectedChannel = 0;
+struct ChannelStatusData {
+  byte channel;
+  byte isEnabled;
+  char icc[21];
+};
+byte channelEnablePin[] { 2, 3, 4, 5, 6, 7, 8, 9};
+ChannelStatusData channelsStatus[8];
+byte selectedChannel = 0;
 int simDataIndex = 0;
-char simData[1000];
+char simData[MODEM_RESPONSE_MAX_CHARS];
 
 // SMS Parser
 struct SmsData {
-  int channel;
-  char sender[32];
+  byte channel;
+  char sender[16];
   char date[16];
   char time[16];
   char* body;
 };
-int smsParserState;
-int headElementsPart;
-
-// Channel status
-struct ChannelStatusData {
-  int channel;
-  bool isEnabled;
-};
-ChannelStatusData channelStatusData;
+byte smsParserState;
+byte headElementsPart;
 
 SoftwareSerial sim(RX, TX);
 Input input;
 
 void enableCommand(CommandParam** params, Stream* response) {
-  int channel = params[0]->asInt();
+  byte channel = params[0]->asInt();
   if (channel >= 0 && channel < CHANNEL_COUNT) {
     ChannelStatusData* status = enableChannel(channel);
     printChannelStatusJson(status);
@@ -60,7 +57,7 @@ void enableCommand(CommandParam** params, Stream* response) {
 }
 
 void disableCommand(CommandParam** params, Stream* response) {
-  int channel = params[0]->asInt();
+  byte channel = params[0]->asInt();
   if (channel >= 0 && channel < CHANNEL_COUNT) {
     ChannelStatusData* status = disableChannel(channel);
     printChannelStatusJson(status);
@@ -68,10 +65,9 @@ void disableCommand(CommandParam** params, Stream* response) {
 }
 
 void statusCommand(CommandParam** params, Stream* response) {
-  int channel = params[0]->asInt();
+  byte channel = params[0]->asInt();
   if (channel >= 0 && channel < CHANNEL_COUNT) {
-    ChannelStatusData* status = getChannelStatus(channel);
-    printChannelStatusJson(status);
+    printChannelStatusJson(&channelsStatus[channel]);
   }
 }
 
@@ -90,11 +86,16 @@ void setup() {
   pinMode(CHANNEL_S1, OUTPUT);
   pinMode(CHANNEL_S2, OUTPUT);
 
-  for (int i = 0; i < CHANNEL_COUNT; i++) {
+  for (byte i = 0; i < CHANNEL_COUNT; i++) {
+    channelsStatus[i].channel = i;
+    channelsStatus[i].isEnabled = false;
+    channelsStatus[i].icc[0] = NULL;
+  }
+  for (byte i = 0; i < CHANNEL_COUNT; i++) {
     pinMode(channelEnablePin[i], OUTPUT);
     disableChannel(i);
   }
-  for (int i = 0; i < CHANNEL_COUNT; i++) {
+  for (byte i = 0; i < CHANNEL_COUNT; i++) {
     enableChannel(i);
     delay(1000);
   }
@@ -106,7 +107,7 @@ void setup() {
 }
 
 void loop() {
-  if (enabledChannels[selectedChannel]) {
+  if (channelsStatus[selectedChannel].isEnabled && readIcc()) {
     if (readSmsAtIndex(FIRST_SMS_INDEX)) {
       deleteSmsAtIndex(FIRST_SMS_INDEX);
     }
@@ -115,30 +116,47 @@ void loop() {
   selectNextChannel();
 }
 
-ChannelStatusData* enableChannel(int channel) {
-  if (!enabledChannels[channel]) {
+ChannelStatusData* enableChannel(byte channel) {
+  if (!channelsStatus[channel].isEnabled) {
     digitalWrite(channelEnablePin[channel], HIGH);
-    enabledChannels[channel] = true;
-    return getChannelStatus(channel);
+    channelsStatus[channel].isEnabled = true;
+    return &channelsStatus[channel];
   } else {
     return NULL;
   }
 }
 
-ChannelStatusData* disableChannel(int channel) {
-  if (enabledChannels[channel]) {
+ChannelStatusData* disableChannel(byte channel) {
+  if (channelsStatus[channel].isEnabled) {
     digitalWrite(channelEnablePin[channel], LOW);
-    enabledChannels[channel] = false;
-    return getChannelStatus(channel);
+    channelsStatus[channel].isEnabled = false;
+    return &channelsStatus[channel];
   } else {
     return NULL;
   }
 }
 
-ChannelStatusData* getChannelStatus(int channel) {
-  channelStatusData.channel = channel;
-  channelStatusData.isEnabled = enabledChannels[channel];
-  return &channelStatusData;
+bool readIcc() {
+  sim.print(F("AT+CCID\r"));
+  bool simPresent = readModemResponse(simData);
+  if (simPresent) {
+    return parseIcc(simData, &channelsStatus[selectedChannel]);
+  } else {
+    return false;
+  }
+}
+
+bool parseIcc(char* iccResponseData, ChannelStatusData* channelStatus) {
+  char* token = strtok (iccResponseData, "\r\n");
+  while (token != NULL) {
+    if (strlen(token) >= 15) {
+      strcpy(channelStatus[selectedChannel].icc, token);
+      return true;
+    }
+    token = strtok (NULL, "\r\n");
+  }
+  channelStatus[selectedChannel].icc[0] = NULL;
+  return false;
 }
 
 bool readSmsAtIndex(int index) {
@@ -197,41 +215,6 @@ void fillSmsHeadPart(int headPartId, char* headPart, SmsData* smsData) {
   }
 }
 
-void printSmsJson(SmsData* smsData) {
-  Serial.print(F("{\"type\": \"sms\""));
-  Serial.print(F(", \"channel\": "));
-  Serial.print(smsData->channel);
-  Serial.print(F(", \"sender\": \""));
-  Serial.print(smsData->sender);
-  Serial.print(F("\", \"datetime\": \""));
-  Serial.print(smsData->date);
-  Serial.print(F(","));
-  Serial.print(smsData->time);
-  Serial.print(F("\", \"body\": \""));
-  Serial.print(smsData->body);
-  Serial.println(F("\"}"));
-}
-
-
-void printChannelStatusJson(ChannelStatusData* statusData) {
-  Serial.print(F("{\"type\": \"status\""));
-  Serial.print(F(", \"channel\": "));
-  Serial.print(statusData->channel);
-  Serial.print(F(", \"isEnabled\": "));
-  Serial.print(statusData->isEnabled);
-  Serial.print(F(", \"status\": \""));
-  Serial.print(statusData->isEnabled ? "Sim enabled" : "Sim disabled");
-  Serial.println(F("\"}"));
-}
-
-void printBootingUpMessage() {
-  Serial.println(F("{\"type\": \"booting\", \"body\": \"Booting Up ...\"}"));
-}
-
-void printBootCompleteMessage() {
-  Serial.println(F("{\"type\": \"booting\", \"body\": \"System ready...\"}"));
-}
-
 void deleteSmsAtIndex(int index) {
   sim.print(F("AT+CMGD="));
   sim.print(index);
@@ -241,26 +224,21 @@ void deleteSmsAtIndex(int index) {
 }
 
 bool readModemResponse(char* response) {
-  int retries = 0;
   int bytesReceived = 0;
-  bool responseCodeRead = false;
   bool successCodeRead = false;
-  bool errorCodeRead = false;
 
   bytesReceived = readUntilResultCode(response);
   if (strlen(simData) > 0) {
     successCodeRead = strstr(simData, "\r\nOK") != NULL;
-    errorCodeRead = strstr(simData, "\r\nERROR") != NULL;
-    responseCodeRead = successCodeRead || errorCodeRead;
   }
 
   return successCodeRead;
 }
 
 int readUntilResultCode(char* response) {
-  int retries = 0;
+  byte retries = 0;
   simDataIndex = 0;
-  while(sim.available() > 0 || retries < MAX_READ_RETRIES) {
+  while((simDataIndex < MODEM_RESPONSE_MAX_CHARS - 1) && (sim.available() > 0 || retries < MAX_READ_RETRIES)) {
     if (sim.available()) {
       response[simDataIndex++] = sim.read();
     } else {
@@ -281,12 +259,55 @@ void selectNextChannel() {
 }
 
 void selectChannel(int channel) {
-  int channelAddress = channelToAddress[channel];
-  digitalWrite(CHANNEL_S0, bitRead(channelAddress,0));
-  digitalWrite(CHANNEL_S1, bitRead(channelAddress,1));
-  digitalWrite(CHANNEL_S2, bitRead(channelAddress,2));
+  digitalWrite(CHANNEL_S0, bitRead(channel,0));
+  digitalWrite(CHANNEL_S1, bitRead(channel,1));
+  digitalWrite(CHANNEL_S2, bitRead(channel,2));
 
   selectedChannel = channel;
+
   delay(SWITCH_CHANNEL_DELAY);
+}
+
+void printSmsJson(SmsData* smsData) {
+  Serial.print(F("{\"type\": \"sms\""));
+  Serial.print(F(", \"channel\": "));
+  Serial.print(smsData->channel);
+  Serial.print(F(", \"icc\": \""));
+  Serial.print(channelsStatus[selectedChannel].icc);
+  Serial.print(F("\", \"sender\": \""));
+  Serial.print(smsData->sender);
+  Serial.print(F("\", \"datetime\": \""));
+  Serial.print(smsData->date);
+  Serial.print(F(","));
+  Serial.print(smsData->time);
+  Serial.print(F("\", \"body\": \""));
+  Serial.print(smsData->body);
+  Serial.println(F("\"}"));
+}
+
+
+void printChannelStatusJson(ChannelStatusData* statusData) {
+  Serial.print(F("{\"type\": \"status\""));
+  Serial.print(F(", \"channel\": "));
+  Serial.print(statusData->channel);
+  Serial.print(F(", \"isEnabled\": "));
+  Serial.print(statusData->isEnabled);
+  Serial.print(F(", \"icc\": \""));
+  Serial.print(statusData->icc);
+  Serial.print(F("\", \"status\": \""));
+  if (statusData->isEnabled) {
+    Serial.print(strlen(statusData->icc) > 0 ? "Channel enabled, SIM present" : "Channel enabled, SIM not present");
+  } else {
+    Serial.print("Channel disabled");
+  }
+  Serial.println(F("\"}"));
+}
+
+void printBootingUpMessage() {
+  Serial.println(F("{\"type\": \"booting\", \"body\": \"Booting Up ...\"}"));
+}
+
+void printBootCompleteMessage() {
+  Serial.println(F("{\"type\": \"booting\", \"body\": \"System ready...\"}"));
 }
 
