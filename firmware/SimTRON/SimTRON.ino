@@ -25,7 +25,7 @@
 // Channels control
 struct ChannelStatusData {
   byte channel;
-  byte isEnabled;
+  bool isEnabled;
   char icc[21];
 };
 byte channelEnablePin[] { 2, 3, 4, 5, 6, 7, 8, 9};
@@ -140,22 +140,22 @@ bool readIcc() {
   sim.print(F("AT+CCID\r"));
   bool simPresent = readModemResponse(simData);
   if (simPresent) {
-    return parseIcc(simData, &channelsStatus[selectedChannel]);
+    return parseIcc(simData);
   } else {
     return false;
   }
 }
 
-bool parseIcc(char* iccResponseData, ChannelStatusData* channelStatus) {
+bool parseIcc(char* iccResponseData) {
   char* token = strtok (iccResponseData, "\r\n");
   while (token != NULL) {
     if (strlen(token) >= 15) {
-      strcpy(channelStatus[selectedChannel].icc, token);
+      strcpy(channelsStatus[selectedChannel].icc, token);
       return true;
     }
     token = strtok (NULL, "\r\n");
   }
-  channelStatus[selectedChannel].icc[0] = NULL;
+  channelsStatus[selectedChannel].icc[0] = NULL;
   return false;
 }
 
