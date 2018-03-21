@@ -36,16 +36,19 @@ enum NetworkRegistrationStatus {
   REGISTERED_ROAMING_FOR_CSFB = 10
 };
 
-// Channels control
 struct ChannelStatusData {
   byte channel;
   bool isEnabled;
   char icc[21];
   NetworkRegistrationStatus registrationStatus;
 };
+
+// Channels control
 byte channelEnablePin[] { 2, 3, 4, 5, 6, 7, 8, 9};
 ChannelStatusData channelsStatus[8];
 byte selectedChannel = 0;
+
+// Modules read
 int simDataIndex = 0;
 char simData[MODEM_RESPONSE_MAX_CHARS];
 
@@ -124,7 +127,7 @@ void setup() {
 
 void loop() {
   if (channelsStatus[selectedChannel].isEnabled && readIcc()) {
-    channelsStatus[selectedChannel].registrationStatus = readNetworkStatus();
+    readNetworkStatus();
     if (readSmsAtIndex(FIRST_SMS_INDEX)) {
       deleteSmsAtIndex(FIRST_SMS_INDEX);
     }
@@ -167,7 +170,10 @@ bool parseIcc(char* iccResponseData) {
   char* token = strtok (iccResponseData, "\r\n");
   while (token != NULL) {
     if (strlen(token) >= 15) {
-      strcpy(channelsStatus[selectedChannel].icc, token);
+      if (strcmp(token, channelsStatus[selectedChannel].icc) != 0) {
+        strcpy(channelsStatus[selectedChannel].icc, token);
+        printChannelStatusJson(&channelsStatus[selectedChannel]);
+      }
       return true;
     }
     token = strtok (NULL, "\r\n");
@@ -176,11 +182,15 @@ bool parseIcc(char* iccResponseData) {
   return false;
 }
 
-NetworkRegistrationStatus readNetworkStatus() {
+void readNetworkStatus() {
   sim.print(F("AT+CREG?\r"));
   bool statusReadCorrectly = readModemResponse(simData);
   if (statusReadCorrectly) {
-    return parseNetworkStatus(simData);
+    NetworkRegistrationStatus status = parseNetworkStatus(simData);
+    if (status != channelsStatus[selectedChannel].registrationStatus) {
+      channelsStatus[selectedChannel].registrationStatus = status;
+      printChannelStatusJson(&channelsStatus[selectedChannel]);
+    }
   } else {
     return UNKNOWN;
   }
