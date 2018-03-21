@@ -22,11 +22,26 @@
 #define SMS_HEAD_DATE 3
 #define SMS_HEAD_TIME 4
 
+enum NetworkRegistrationStatus {
+  NOT_REGISTERED = 0,
+  REGISTERED_HOME = 1,
+  SEARCHING = 2,
+  REGISTRATION_DENIED = 3,
+  UNKNOWN = 4,
+  REGISTERED_ROAMING = 5,
+  REGISTERED_HOME_SMS_ONLY = 6,
+  REGISTERED_ROAMING_SMS_ONLY = 7,
+  REGISTERED_FOR_EMERGENCY_ONLY = 8,
+  REGISTERED_HOME_FOR_CSFB = 9,
+  REGISTERED_ROAMING_FOR_CSFB = 10
+};
+
 // Channels control
 struct ChannelStatusData {
   byte channel;
   bool isEnabled;
   char icc[21];
+  NetworkRegistrationStatus registrationStatus;
 };
 byte channelEnablePin[] { 2, 3, 4, 5, 6, 7, 8, 9};
 ChannelStatusData channelsStatus[8];
@@ -90,6 +105,7 @@ void setup() {
     channelsStatus[i].channel = i;
     channelsStatus[i].isEnabled = false;
     channelsStatus[i].icc[0] = NULL;
+    channelsStatus[i].registrationStatus = NOT_REGISTERED;
   }
   for (byte i = 0; i < CHANNEL_COUNT; i++) {
     pinMode(channelEnablePin[i], OUTPUT);
@@ -108,6 +124,7 @@ void setup() {
 
 void loop() {
   if (channelsStatus[selectedChannel].isEnabled && readIcc()) {
+    channelsStatus[selectedChannel].registrationStatus = readNetworkStatus();
     if (readSmsAtIndex(FIRST_SMS_INDEX)) {
       deleteSmsAtIndex(FIRST_SMS_INDEX);
     }
@@ -157,6 +174,31 @@ bool parseIcc(char* iccResponseData) {
   }
   channelsStatus[selectedChannel].icc[0] = NULL;
   return false;
+}
+
+NetworkRegistrationStatus readNetworkStatus() {
+  sim.print(F("AT+CREG?\r"));
+  bool statusReadCorrectly = readModemResponse(simData);
+  if (statusReadCorrectly) {
+    return parseNetworkStatus(simData);
+  } else {
+    return UNKNOWN;
+  }
+}
+
+NetworkRegistrationStatus parseNetworkStatus(char* networkStatusResponseData) {
+  char* token = strtok (networkStatusResponseData, "\r\n");
+  while (token != NULL) {
+    if (strstr(token, "+CREG:") == token) {
+      int networkStatus = token[9] - '0';
+      if (networkStatus == 1 && token[10] == '0') {
+        networkStatus = 10;
+      }
+      return networkStatus;
+    }
+    token = strtok (NULL, "\r\n");
+  }
+  return UNKNOWN;
 }
 
 bool readSmsAtIndex(int index) {
@@ -294,11 +336,52 @@ void printChannelStatusJson(ChannelStatusData* statusData) {
   Serial.print(statusData->isEnabled);
   Serial.print(F(", \"icc\": \""));
   Serial.print(statusData->icc);
-  Serial.print(F("\", \"status\": \""));
+  Serial.print(F("\", \"networkStatus\": "));
+  Serial.print(statusData->registrationStatus);
+  Serial.print(F(", \"status\": \""));
   if (statusData->isEnabled) {
-    Serial.print(strlen(statusData->icc) > 0 ? "Channel enabled, SIM present" : "Channel enabled, SIM not present");
+    if (strlen(statusData->icc) > 0) {
+      Serial.print(F("Channel enabled, SIM present, "));
+      switch (statusData->registrationStatus) {
+        case NOT_REGISTERED:
+          Serial.print(F("Not registered"));
+          break;
+        case REGISTERED_HOME:
+          Serial.print(F("Registered in home network"));
+          break;
+        case SEARCHING:
+          Serial.print(F("Searching network"));
+          break;
+        case REGISTRATION_DENIED:
+          Serial.print(F("Registration denied"));
+          break;
+        case UNKNOWN:
+          Serial.print(F("Unknown registration status"));
+          break;
+        case REGISTERED_ROAMING:
+          Serial.print(F("Registered in roaming"));
+          break;
+        case REGISTERED_HOME_SMS_ONLY:
+          Serial.print(F("Registered in home network for SMS only"));
+          break;
+        case REGISTERED_ROAMING_SMS_ONLY:
+          Serial.print(F("Registered in roaming for SMS only"));
+          break;
+        case REGISTERED_FOR_EMERGENCY_ONLY:
+          Serial.print(F("Registered for emergency use only"));
+          break;
+        case REGISTERED_HOME_FOR_CSFB:
+          Serial.print(F("Registered in home network for CSFB"));
+          break;
+        case REGISTERED_ROAMING_FOR_CSFB:
+          Serial.print(F("Registered in roaming for CSFB"));
+          break;
+      };
+    } else {
+      Serial.print(F("Channel enabled, SIM not present"));
+    }
   } else {
-    Serial.print("Channel disabled");
+    Serial.print(F("Channel disabled"));
   }
   Serial.println(F("\"}"));
 }
