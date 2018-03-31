@@ -10,6 +10,7 @@
 #define CHANNEL_S1 A2
 #define CHANNEL_S2 A3
 #define SWITCH_CHANNEL_DELAY 50
+#define STATUS_POLL_INTERVAL 6
 
 #define MODEM_RESPONSE_MAX_CHARS 750
 #define MAX_READ_RETRIES 25
@@ -37,16 +38,17 @@ enum NetworkRegistrationStatus {
 };
 
 struct ChannelStatusData {
-  byte channel;
+  int channel;
   bool isEnabled;
   char icc[21];
   NetworkRegistrationStatus registrationStatus;
 };
 
 // Channels control
-byte channelEnablePin[] { 2, 3, 4, 5, 6, 7, 8, 9};
+int channelEnablePin[] { 2, 3, 4, 5, 6, 7, 8, 9};
 ChannelStatusData channelsStatus[8];
-byte selectedChannel = 0;
+int selectedChannel = 0;
+int statusPollCounter = 0;
 
 // Modules read
 int simDataIndex = 0;
@@ -54,20 +56,20 @@ char simData[MODEM_RESPONSE_MAX_CHARS];
 
 // SMS Parser
 struct SmsData {
-  byte channel;
+  int channel;
   char sender[16];
   char date[16];
   char time[16];
   char* body;
 };
-byte smsParserState;
-byte headElementsPart;
+int smsParserState;
+int headElementsPart;
 
 SoftwareSerial sim(RX, TX);
 Input input;
 
 void enableCommand(CommandParam** params, Stream* response) {
-  byte channel = params[0]->asInt();
+  int channel = params[0]->asInt();
   if (channel >= 0 && channel < CHANNEL_COUNT) {
     ChannelStatusData* status = enableChannel(channel);
     printChannelStatusJson(status, true);
@@ -75,7 +77,7 @@ void enableCommand(CommandParam** params, Stream* response) {
 }
 
 void disableCommand(CommandParam** params, Stream* response) {
-  byte channel = params[0]->asInt();
+  int channel = params[0]->asInt();
   if (channel >= 0 && channel < CHANNEL_COUNT) {
     ChannelStatusData* status = disableChannel(channel);
     printChannelStatusJson(status, true);
@@ -83,7 +85,7 @@ void disableCommand(CommandParam** params, Stream* response) {
 }
 
 void statusCommand(CommandParam** params, Stream* response) {
-  byte channel = params[0]->asInt();
+  int channel = params[0]->asInt();
   if (channel >= 0 && channel < CHANNEL_COUNT) {
     printChannelStatusJson(&channelsStatus[channel], true);
   }
@@ -91,7 +93,7 @@ void statusCommand(CommandParam** params, Stream* response) {
 
 void catalogCommand(CommandParam** params, Stream* response) {
   response->print(F("["));
-  for (byte i = 0; i < CHANNEL_COUNT; i++) {
+  for (int i = 0; i < CHANNEL_COUNT; i++) {
     printChannelStatusJson(&channelsStatus[i], false);
     if (i < CHANNEL_COUNT - 1) {
       response->print(F(","));
@@ -116,17 +118,11 @@ void setup() {
   pinMode(CHANNEL_S1, OUTPUT);
   pinMode(CHANNEL_S2, OUTPUT);
 
-  for (byte i = 0; i < CHANNEL_COUNT; i++) {
-    channelsStatus[i].channel = i;
-    channelsStatus[i].isEnabled = false;
-    channelsStatus[i].icc[0] = NULL;
-    channelsStatus[i].registrationStatus = NOT_REGISTERED;
-  }
-  for (byte i = 0; i < CHANNEL_COUNT; i++) {
+  for (int i = 0; i < CHANNEL_COUNT; i++) {
     pinMode(channelEnablePin[i], OUTPUT);
-    disableChannel(i);
+    initChannel(i, false);
   }
-  for (byte i = 0; i < CHANNEL_COUNT; i++) {
+  for (int i = 0; i < CHANNEL_COUNT; i++) {
     enableChannel(i);
     delay(1000);
   }
@@ -138,9 +134,12 @@ void setup() {
 }
 
 void loop() {
-  if (channelsStatus[selectedChannel].isEnabled && readIcc()) {
-    readNetworkStatus();
-    if (readSmsAtIndex(FIRST_SMS_INDEX)) {
+  if (channelsStatus[selectedChannel].isEnabled) {
+    if (statusPollCounter == 0) {
+      if (readIcc()) {
+        readNetworkStatus();
+      }
+    } else if (readSmsAtIndex(FIRST_SMS_INDEX)) {
       deleteSmsAtIndex(FIRST_SMS_INDEX);
     }
   }
@@ -148,40 +147,45 @@ void loop() {
   selectNextChannel();
 }
 
-ChannelStatusData* enableChannel(byte channel) {
-  if (!channelsStatus[channel].isEnabled) {
-    digitalWrite(channelEnablePin[channel], HIGH);
-    channelsStatus[channel].isEnabled = true;
-    return &channelsStatus[channel];
-  } else {
-    return NULL;
-  }
+ChannelStatusData* initChannel(int channel, bool enable) {
+  channelsStatus[channel].channel = channel;
+  channelsStatus[channel].icc[0] = 0;
+  channelsStatus[channel].registrationStatus = NOT_REGISTERED;
+  return enable ? enableChannel(channel) : disableChannel(channel);
 }
 
-ChannelStatusData* disableChannel(byte channel) {
-  if (channelsStatus[channel].isEnabled) {
-    digitalWrite(channelEnablePin[channel], LOW);
-    channelsStatus[channel].isEnabled = false;
-    return &channelsStatus[channel];
-  } else {
-    return NULL;
-  }
+ChannelStatusData* enableChannel(int channel) {
+  digitalWrite(channelEnablePin[channel], HIGH);
+  channelsStatus[channel].isEnabled = true;
+  return &channelsStatus[channel];
+}
+
+ChannelStatusData* disableChannel(int channel) {
+  digitalWrite(channelEnablePin[channel], LOW);
+  channelsStatus[channel].isEnabled = false;
+  channelsStatus[channel].icc[0] = 0;
+  channelsStatus[channel].registrationStatus = UNKNOWN;
+  return &channelsStatus[channel];
 }
 
 bool readIcc() {
-  sim.print(F("AT+CCID\r"));
-  bool simPresent = readModemResponse(simData);
-  if (simPresent) {
-    return parseIcc(simData);
+  if (strlen(channelsStatus[selectedChannel].icc) == 0) {
+    sim.print(F("AT+CCID\r"));
+    bool simPresent = readModemResponse(simData);
+    if (simPresent) {
+      return parseIcc(simData);
+    } else {
+      return false;
+    }
   } else {
-    return false;
+    return true;
   }
 }
 
 bool parseIcc(char* iccResponseData) {
   char* token = strtok (iccResponseData, "\r\n");
   while (token != NULL) {
-    if (strlen(token) >= 15) {
+    if (isValidIcc(token)) {
       if (strcmp(token, channelsStatus[selectedChannel].icc) != 0) {
         strcpy(channelsStatus[selectedChannel].icc, token);
         printChannelStatusJson(&channelsStatus[selectedChannel], true);
@@ -194,12 +198,26 @@ bool parseIcc(char* iccResponseData) {
   return false;
 }
 
+bool isValidIcc(char* icc) {
+  if (strlen(icc) >= 15) {
+    while (icc[0] > 0) {
+      if (icc[0] < 48 || (icc[0] > 57 && icc[0] != 'f' && icc[0] != 'F')) { // only 0..9, F or f chars
+        return false;
+      }
+      icc++;
+    }
+    return true;
+  } else {
+    return false;
+  }
+}
+
 void readNetworkStatus() {
   sim.print(F("AT+CREG?\r"));
   bool statusReadCorrectly = readModemResponse(simData);
   if (statusReadCorrectly) {
     NetworkRegistrationStatus status = parseNetworkStatus(simData);
-    if (status != channelsStatus[selectedChannel].registrationStatus) {
+    if (status != UNKNOWN && status != channelsStatus[selectedChannel].registrationStatus) {
       channelsStatus[selectedChannel].registrationStatus = status;
       printChannelStatusJson(&channelsStatus[selectedChannel], true);
     }
@@ -216,7 +234,7 @@ NetworkRegistrationStatus parseNetworkStatus(char* networkStatusResponseData) {
       if (networkStatus == 1 && token[10] == '0') {
         networkStatus = 10;
       }
-      return networkStatus;
+      return networkStatus >= 1 && networkStatus <= 10 ? networkStatus : UNKNOWN;
     }
     token = strtok (NULL, "\r\n");
   }
@@ -288,10 +306,9 @@ void deleteSmsAtIndex(int index) {
 }
 
 bool readModemResponse(char* response) {
-  int bytesReceived = 0;
   bool successCodeRead = false;
 
-  bytesReceived = readUntilResultCode(response);
+  readUntilResultCode(response);
   if (strlen(simData) > 0) {
     successCodeRead = strstr(simData, "\r\nOK") != NULL;
   }
@@ -299,8 +316,8 @@ bool readModemResponse(char* response) {
   return successCodeRead;
 }
 
-int readUntilResultCode(char* response) {
-  byte retries = 0;
+void readUntilResultCode(char* response) {
+  int retries = 0;
   simDataIndex = 0;
   while((simDataIndex < MODEM_RESPONSE_MAX_CHARS - 1) && (sim.available() > 0 || retries < MAX_READ_RETRIES)) {
     if (sim.available()) {
@@ -310,16 +327,23 @@ int readUntilResultCode(char* response) {
       retries++;
     }
   }
-  response[simDataIndex] = NULL;
-  return simDataIndex;
+  response[simDataIndex] = 0;
 }
 
 void selectNextChannel() {
   int channel = ++selectedChannel;
   if (channel >= CHANNEL_COUNT) {
     channel = 0;
+    updateStatusPollCounter();
   }
   selectChannel(channel);
+}
+
+void updateStatusPollCounter() {
+  statusPollCounter--;
+  if (statusPollCounter < 0) {
+    statusPollCounter = STATUS_POLL_INTERVAL;
+  }
 }
 
 void selectChannel(int channel) {
