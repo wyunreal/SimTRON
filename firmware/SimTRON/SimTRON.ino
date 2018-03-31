@@ -134,8 +134,8 @@ void setup() {
 }
 
 void loop() {
-  if (channelsStatus[selectedChannel].isEnabled) {
-    if (statusPollCounter == 0) {
+  if (isChannelEnabled(selectedChannel)) {
+    if (shouldReadStatus()) {
       if (readIcc()) {
         readNetworkStatus();
       }
@@ -166,6 +166,10 @@ ChannelStatusData* disableChannel(int channel) {
   channelsStatus[channel].icc[0] = 0;
   channelsStatus[channel].registrationStatus = UNKNOWN;
   return &channelsStatus[channel];
+}
+
+bool isChannelEnabled(int channel) {
+  return channelsStatus[channel].isEnabled;
 }
 
 bool readIcc() {
@@ -344,6 +348,10 @@ void updateStatusPollCounter() {
   if (statusPollCounter < 0) {
     statusPollCounter = STATUS_POLL_INTERVAL;
   }
+}
+
+bool shouldReadStatus() {
+  return statusPollCounter == 0;
 }
 
 void selectChannel(int channel) {
