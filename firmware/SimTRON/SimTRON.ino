@@ -10,7 +10,7 @@
 #define CHANNEL_S1 A2
 #define CHANNEL_S2 A3
 #define SWITCH_CHANNEL_DELAY 50
-#define STATUS_POLL_INTERVAL 6
+#define STATUS_POLL_INTERVAL 2
 
 #define MODEM_RESPONSE_MAX_CHARS 750
 #define MAX_READ_RETRIES 25
@@ -40,6 +40,7 @@ enum NetworkRegistrationStatus {
 struct ChannelStatusData {
   int channel;
   bool isEnabled;
+  char msisdn[16];
   char icc[21];
   NetworkRegistrationStatus registrationStatus;
 };
@@ -137,35 +138,41 @@ void loop() {
   if (isChannelEnabled(selectedChannel)) {
     if (shouldReadStatus()) {
       if (readIcc()) {
+        readMsisdn();
         readNetworkStatus();
       }
     } else if (readSmsAtIndex(FIRST_SMS_INDEX)) {
       deleteSmsAtIndex(FIRST_SMS_INDEX);
     }
   }
-  
+
   selectNextChannel();
 }
 
 ChannelStatusData* initChannel(int channel, bool enable) {
   channelsStatus[channel].channel = channel;
-  channelsStatus[channel].icc[0] = 0;
-  channelsStatus[channel].registrationStatus = NOT_REGISTERED;
+  resetChannelStatusData(channel);
   return enable ? enableChannel(channel) : disableChannel(channel);
 }
 
 ChannelStatusData* enableChannel(int channel) {
   digitalWrite(channelEnablePin[channel], HIGH);
   channelsStatus[channel].isEnabled = true;
+  resetChannelStatusData(channel);
   return &channelsStatus[channel];
 }
 
 ChannelStatusData* disableChannel(int channel) {
   digitalWrite(channelEnablePin[channel], LOW);
   channelsStatus[channel].isEnabled = false;
+  resetChannelStatusData(channel);
+  return &channelsStatus[channel];
+}
+
+void resetChannelStatusData(int channel) {
+  channelsStatus[channel].msisdn[0] = 0;
   channelsStatus[channel].icc[0] = 0;
   channelsStatus[channel].registrationStatus = UNKNOWN;
-  return &channelsStatus[channel];
 }
 
 bool isChannelEnabled(int channel) {
@@ -198,7 +205,7 @@ bool parseIcc(char* iccResponseData) {
     }
     token = strtok (NULL, "\r\n");
   }
-  channelsStatus[selectedChannel].icc[0] = NULL;
+  channelsStatus[selectedChannel].icc[0] = 0;
   return false;
 }
 
@@ -209,6 +216,43 @@ bool isValidIcc(char* icc) {
         return false;
       }
       icc++;
+    }
+    return true;
+  } else {
+    return false;
+  }
+}
+
+void readMsisdn() {
+  if (strlen(channelsStatus[selectedChannel].msisdn) == 0) {
+    sim.print(F("AT+CNUM\r"));
+    if (readModemResponse(simData)) {
+      parseMsisdn(simData);
+    }
+  }
+}
+
+void parseMsisdn(char* msisdnResponseData) {
+  char* token = strtok (msisdnResponseData, "CNUM: ,\"\r\n");
+  while (token != NULL) {
+    if (isValidMsisdn(token)) {
+      if (strcmp(token, channelsStatus[selectedChannel].msisdn) != 0) {
+        strcpy(channelsStatus[selectedChannel].msisdn, token);
+        return;
+      }
+    }
+    token = strtok (NULL, "CNUM: ,\"\r\n");
+  }
+  channelsStatus[selectedChannel].msisdn[0] = 0;
+}
+
+bool isValidMsisdn(char* msisdn) {
+  if (strlen(msisdn) > 5) {
+    while (msisdn[0] > 0) {
+      if ((msisdn[0] < 48 && msisdn[0] != 43) || msisdn[0] > 57) { // only 0..9 or '+' chars
+        return false;
+      }
+      msisdn++;
     }
     return true;
   } else {
@@ -370,6 +414,8 @@ void printSmsJson(SmsData* smsData) {
   Serial.print(smsData->channel);
   Serial.print(F(", \"icc\": \""));
   Serial.print(channelsStatus[selectedChannel].icc);
+  Serial.print(F("\", \"msisdn\": \""));
+  Serial.print(channelsStatus[selectedChannel].msisdn);
   Serial.print(F("\", \"sender\": \""));
   Serial.print(smsData->sender);
   Serial.print(F("\", \"datetime\": \""));
@@ -390,6 +436,8 @@ void printChannelStatusJson(ChannelStatusData* statusData, bool printEndOfLine) 
   Serial.print(statusData->isEnabled);
   Serial.print(F(", \"icc\": \""));
   Serial.print(statusData->icc);
+  Serial.print(F("\", \"msisdn\": \""));
+  Serial.print(statusData->msisdn);
   Serial.print(F("\", \"networkStatus\": "));
   Serial.print(statusData->registrationStatus);
   Serial.print(F(", \"status\": \""));
