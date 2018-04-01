@@ -88,6 +88,10 @@ void disableCommand(CommandParam** params, Stream* response) {
 void statusCommand(CommandParam** params, Stream* response) {
   int channel = params[0]->asInt();
   if (channel >= 0 && channel < CHANNEL_COUNT) {
+    if (readIcc(channel)) {
+      readMsisdn(channel);
+      readNetworkStatus(channel);
+    }
     printChannelStatusJson(&channelsStatus[channel], false, true);
   }
 }
@@ -136,12 +140,10 @@ void setup() {
 
 void loop() {
   if (isChannelEnabled(selectedChannel)) {
-    if (shouldReadStatus()) {
-      if (readIcc()) {
-        readMsisdn();
-        readNetworkStatus();
-      }
-    } else if (readSmsAtIndex(FIRST_SMS_INDEX)) {
+    if (readIcc(selectedChannel)) {
+      readMsisdn(selectedChannel);
+    }
+    if (readSmsAtIndex(FIRST_SMS_INDEX)) {
       deleteSmsAtIndex(FIRST_SMS_INDEX);
     }
   }
@@ -179,12 +181,12 @@ bool isChannelEnabled(int channel) {
   return channelsStatus[channel].isEnabled;
 }
 
-bool readIcc() {
-  if (strlen(channelsStatus[selectedChannel].icc) == 0) {
+bool readIcc(int channel) {
+  if (strlen(channelsStatus[channel].icc) == 0) {
     sim.print(F("AT+CCID\r"));
     bool simPresent = readModemResponse(simData);
     if (simPresent) {
-      return parseIcc(simData);
+      return parseIcc(simData, channel);
     } else {
       return false;
     }
@@ -193,18 +195,18 @@ bool readIcc() {
   }
 }
 
-bool parseIcc(char* iccResponseData) {
+bool parseIcc(char* iccResponseData, int channel) {
   char* token = strtok (iccResponseData, "\r\n");
   while (token != NULL) {
     if (isValidIcc(token)) {
-      if (strcmp(token, channelsStatus[selectedChannel].icc) != 0) {
-        strcpy(channelsStatus[selectedChannel].icc, token);
+      if (strcmp(token, channelsStatus[channel].icc) != 0) {
+        strcpy(channelsStatus[channel].icc, token);
       }
       return true;
     }
     token = strtok (NULL, "\r\n");
   }
-  channelsStatus[selectedChannel].icc[0] = 0;
+  channelsStatus[channel].icc[0] = 0;
   return false;
 }
 
@@ -222,27 +224,27 @@ bool isValidIcc(char* icc) {
   }
 }
 
-void readMsisdn() {
-  if (strlen(channelsStatus[selectedChannel].msisdn) == 0) {
+void readMsisdn(int channel) {
+  if (strlen(channelsStatus[channel].msisdn) == 0) {
     sim.print(F("AT+CNUM\r"));
     if (readModemResponse(simData)) {
-      parseMsisdn(simData);
+      parseMsisdn(simData, channel);
     }
   }
 }
 
-void parseMsisdn(char* msisdnResponseData) {
+void parseMsisdn(char* msisdnResponseData, int channel) {
   char* token = strtok (msisdnResponseData, "CNUM: ,\"\r\n");
   while (token != NULL) {
     if (isValidMsisdn(token)) {
-      if (strcmp(token, channelsStatus[selectedChannel].msisdn) != 0) {
-        strcpy(channelsStatus[selectedChannel].msisdn, token);
+      if (strcmp(token, channelsStatus[channel].msisdn) != 0) {
+        strcpy(channelsStatus[channel].msisdn, token);
         return;
       }
     }
     token = strtok (NULL, "CNUM: ,\"\r\n");
   }
-  channelsStatus[selectedChannel].msisdn[0] = 0;
+  strcpy(channelsStatus[channel].msisdn, "?");
 }
 
 bool isValidMsisdn(char* msisdn) {
@@ -259,14 +261,13 @@ bool isValidMsisdn(char* msisdn) {
   }
 }
 
-void readNetworkStatus() {
+void readNetworkStatus(int channel) {
   sim.print(F("AT+CREG?\r"));
   bool statusReadCorrectly = readModemResponse(simData);
   if (statusReadCorrectly) {
     NetworkRegistrationStatus status = parseNetworkStatus(simData);
-    if (status != UNKNOWN && status != channelsStatus[selectedChannel].registrationStatus) {
-      channelsStatus[selectedChannel].registrationStatus = status;
-      printChannelStatusJson(&channelsStatus[selectedChannel], true, true);
+    if (status != UNKNOWN && status != channelsStatus[channel].registrationStatus) {
+      channelsStatus[channel].registrationStatus = status;
     }
   } else {
     return UNKNOWN;
@@ -381,20 +382,8 @@ void selectNextChannel() {
   int channel = ++selectedChannel;
   if (channel >= CHANNEL_COUNT) {
     channel = 0;
-    updateStatusPollCounter();
   }
   selectChannel(channel);
-}
-
-void updateStatusPollCounter() {
-  statusPollCounter--;
-  if (statusPollCounter < 0) {
-    statusPollCounter = STATUS_POLL_INTERVAL;
-  }
-}
-
-bool shouldReadStatus() {
-  return statusPollCounter == 0;
 }
 
 void selectChannel(int channel) {
