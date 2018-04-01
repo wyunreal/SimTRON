@@ -12,7 +12,7 @@
 #define SWITCH_CHANNEL_DELAY 50
 #define STATUS_POLL_INTERVAL 2
 
-#define MODEM_RESPONSE_MAX_CHARS 750
+#define MODEM_RESPONSE_MAX_CHARS 650
 #define MAX_READ_RETRIES 25
 #define NO_DATA_ON_READ_DELAY 10
 
@@ -73,7 +73,7 @@ void enableCommand(CommandParam** params, Stream* response) {
   int channel = params[0]->asInt();
   if (channel >= 0 && channel < CHANNEL_COUNT) {
     ChannelStatusData* status = enableChannel(channel);
-    printChannelStatusJson(status, true);
+    printChannelStatusJson(status, false, true);
   }
 }
 
@@ -81,21 +81,21 @@ void disableCommand(CommandParam** params, Stream* response) {
   int channel = params[0]->asInt();
   if (channel >= 0 && channel < CHANNEL_COUNT) {
     ChannelStatusData* status = disableChannel(channel);
-    printChannelStatusJson(status, true);
+    printChannelStatusJson(status, false, true);
   }
 }
 
 void statusCommand(CommandParam** params, Stream* response) {
   int channel = params[0]->asInt();
   if (channel >= 0 && channel < CHANNEL_COUNT) {
-    printChannelStatusJson(&channelsStatus[channel], true);
+    printChannelStatusJson(&channelsStatus[channel], false, true);
   }
 }
 
 void catalogCommand(CommandParam** params, Stream* response) {
   response->print(F("["));
   for (int i = 0; i < CHANNEL_COUNT; i++) {
-    printChannelStatusJson(&channelsStatus[i], false);
+    printChannelStatusJson(&channelsStatus[i], false, false);
     if (i < CHANNEL_COUNT - 1) {
       response->print(F(","));
     }
@@ -199,7 +199,6 @@ bool parseIcc(char* iccResponseData) {
     if (isValidIcc(token)) {
       if (strcmp(token, channelsStatus[selectedChannel].icc) != 0) {
         strcpy(channelsStatus[selectedChannel].icc, token);
-        printChannelStatusJson(&channelsStatus[selectedChannel], true);
       }
       return true;
     }
@@ -267,7 +266,7 @@ void readNetworkStatus() {
     NetworkRegistrationStatus status = parseNetworkStatus(simData);
     if (status != UNKNOWN && status != channelsStatus[selectedChannel].registrationStatus) {
       channelsStatus[selectedChannel].registrationStatus = status;
-      printChannelStatusJson(&channelsStatus[selectedChannel], true);
+      printChannelStatusJson(&channelsStatus[selectedChannel], true, true);
     }
   } else {
     return UNKNOWN;
@@ -428,9 +427,10 @@ void printSmsJson(SmsData* smsData) {
 }
 
 
-void printChannelStatusJson(ChannelStatusData* statusData, bool printEndOfLine) {
-  Serial.print(F("{\"type\": \"status\""));
-  Serial.print(F(", \"channel\": "));
+void printChannelStatusJson(ChannelStatusData* statusData, bool isStatusUpdate, bool printEndOfLine) {
+  Serial.print(F("{\"type\": \""));
+  Serial.print(isStatusUpdate ? F("statusUpdate") : F("status"));
+  Serial.print(F("\", \"channel\": "));
   Serial.print(statusData->channel);
   Serial.print(F(", \"isEnabled\": "));
   Serial.print(statusData->isEnabled);
