@@ -49,7 +49,6 @@ struct ChannelStatusData {
 int channelEnablePin[] { 2, 3, 4, 5, 6, 7, 8, 9};
 ChannelStatusData channelsStatus[8];
 int selectedChannel = 0;
-int statusPollCounter = 0;
 
 // Modules read
 int simDataIndex = 0;
@@ -88,23 +87,29 @@ void disableCommand(CommandParam** params, Stream* response) {
 void statusCommand(CommandParam** params, Stream* response) {
   int channel = params[0]->asInt();
   if (channel >= 0 && channel < CHANNEL_COUNT) {
-    if (readIcc(channel)) {
-      readMsisdn(channel);
-      readNetworkStatus(channel);
-    }
+    readStatus(channel);
     printChannelStatusJson(&channelsStatus[channel], false, true);
   }
 }
 
 void catalogCommand(CommandParam** params, Stream* response) {
-  response->print(F("["));
+  int currentlySelectedChannel = selectedChannel;
   for (int i = 0; i < CHANNEL_COUNT; i++) {
-    printChannelStatusJson(&channelsStatus[i], false, false);
-    if (i < CHANNEL_COUNT - 1) {
-      response->print(F(","));
+    if (readStatus(i)) {
+      printChannelStatusJson(&channelsStatus[i], false, true);
     }
   }
-  response->println(F("]"));
+  selectedChannel = currentlySelectedChannel;
+}
+bool readStatus(int channel) {
+  selectChannel(channel);
+  if (readIcc(channel)) {
+    readMsisdn(channel);
+    readNetworkStatus(channel);
+    return true;
+  } else {
+    return false;
+  }
 }
 
 InputCommand* commandDefinitions[] = defineCommands(
@@ -182,7 +187,7 @@ bool isChannelEnabled(int channel) {
 }
 
 bool readIcc(int channel) {
-  if (strlen(channelsStatus[channel].icc) == 0) {
+  if (!isSimPresenceConfirmed(channel)) {
     sim.print(F("AT+CCID\r"));
     bool simPresent = readModemResponse(simData);
     if (simPresent) {
@@ -193,6 +198,10 @@ bool readIcc(int channel) {
   } else {
     return true;
   }
+}
+
+bool isSimPresenceConfirmed(int channel) {
+  return strlen(channelsStatus[channel].icc) > 0;
 }
 
 bool parseIcc(char* iccResponseData, int channel) {
@@ -270,7 +279,7 @@ void readNetworkStatus(int channel) {
       channelsStatus[channel].registrationStatus = status;
     }
   } else {
-    return UNKNOWN;
+    channelsStatus[channel].registrationStatus = UNKNOWN;
   }
 }
 
@@ -282,7 +291,7 @@ NetworkRegistrationStatus parseNetworkStatus(char* networkStatusResponseData) {
       if (networkStatus == 1 && token[10] == '0') {
         networkStatus = 10;
       }
-      return networkStatus >= 1 && networkStatus <= 10 ? networkStatus : UNKNOWN;
+      return networkStatus >= 1 && networkStatus <= 10 ? (NetworkRegistrationStatus)networkStatus : UNKNOWN;
     }
     token = strtok (NULL, "\r\n");
   }
@@ -349,8 +358,7 @@ void deleteSmsAtIndex(int index) {
   sim.print(F("AT+CMGD="));
   sim.print(index);
   sim.print('\r');
-  bool messageDeleted = readModemResponse(simData);
-  return messageDeleted;
+  readModemResponse(simData);
 }
 
 bool readModemResponse(char* response) {
