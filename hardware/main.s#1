@@ -778,10 +778,6 @@ W = angled&lt;p&gt;
 </part>
 <part name="GND13" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="P+10" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="VCC" device=""/>
-<part name="GND14" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
-<part name="P+11" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="VCC" device=""/>
-<part name="P+12" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="VCC" device=""/>
-<part name="GND15" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 </parts>
 <sheets>
 <sheet>
@@ -826,10 +822,6 @@ W = angled&lt;p&gt;
 <instance part="P+10" gate="VCC" x="-20.32" y="96.52"/>
 <instance part="RXMUX" gate="P" x="116.84" y="68.58"/>
 <instance part="TXMUX" gate="P" x="172.72" y="68.58"/>
-<instance part="GND14" gate="1" x="111.76" y="53.34"/>
-<instance part="P+11" gate="VCC" x="116.84" y="81.28"/>
-<instance part="P+12" gate="VCC" x="172.72" y="81.28"/>
-<instance part="GND15" gate="1" x="167.64" y="53.34"/>
 </instances>
 <busses>
 <bus name="ADDR[0..2]">
@@ -972,22 +964,6 @@ W = angled&lt;p&gt;
 <pinref part="X1" gate="-2" pin="S"/>
 <pinref part="GND13" gate="1" pin="GND"/>
 </segment>
-<segment>
-<pinref part="RXMUX" gate="P" pin="GND"/>
-<pinref part="RXMUX" gate="P" pin="VEE"/>
-<wire x1="116.84" y1="60.96" x2="111.76" y2="60.96" width="0.1524" layer="91"/>
-<wire x1="111.76" y1="60.96" x2="111.76" y2="55.88" width="0.1524" layer="91"/>
-<junction x="111.76" y="60.96"/>
-<pinref part="GND14" gate="1" pin="GND"/>
-</segment>
-<segment>
-<pinref part="TXMUX" gate="P" pin="VEE"/>
-<pinref part="GND15" gate="1" pin="GND"/>
-<wire x1="167.64" y1="60.96" x2="167.64" y2="55.88" width="0.1524" layer="91"/>
-<pinref part="TXMUX" gate="P" pin="GND"/>
-<wire x1="172.72" y1="60.96" x2="167.64" y2="60.96" width="0.1524" layer="91"/>
-<junction x="167.64" y="60.96"/>
-</segment>
 </net>
 <net name="VCC" class="0">
 <segment>
@@ -1087,16 +1063,6 @@ W = angled&lt;p&gt;
 <segment>
 <pinref part="X1" gate="-1" pin="S"/>
 <pinref part="P+10" gate="VCC" pin="VCC"/>
-</segment>
-<segment>
-<pinref part="RXMUX" gate="P" pin="VCC"/>
-<wire x1="116.84" y1="76.2" x2="116.84" y2="78.74" width="0.1524" layer="91"/>
-<pinref part="P+11" gate="VCC" pin="VCC"/>
-</segment>
-<segment>
-<pinref part="P+12" gate="VCC" pin="VCC"/>
-<pinref part="TXMUX" gate="P" pin="VCC"/>
-<wire x1="172.72" y1="78.74" x2="172.72" y2="76.2" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="ADDR0" class="0">
