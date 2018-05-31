@@ -3,6 +3,8 @@
 #include <string.h>
 #include <avr/wdt.h>
 
+#define VERSION "1.0.0"
+
 #define RX 10
 #define TX 11
 
@@ -74,6 +76,10 @@ void resetCommand(CommandParams &params, Stream &response) {
   while(true);
 }
 
+void supportCommand(CommandParams &params, Stream &response) {
+  printSupportMessage();
+}
+
 void enableCommand(CommandParams &params, Stream &response) {
   int channel = params.getParamAsInt(0);
   if (channel >= 0 && channel < CHANNEL_COUNT) {
@@ -132,6 +138,7 @@ void sendSmsCommand(CommandParams &params, Stream &response) {
 
 const InputCommand commandDefinitions[] PROGMEM = defineCommands(
   command("reset", 0, &resetCommand),
+  command("support", 0, &supportCommand),
   command("enable", 1, &enableCommand),
   command("disable", 1, &disableCommand),
   command("status", 1, &statusCommand),
@@ -555,3 +562,12 @@ void printErrorSendingSmsMessage() {
 void printSmsSentMessage() {
   Serial.println(F("{\"type\": \"info\", \"body\": \"SMS sent\"}"));
 }
+
+void printSupportMessage() {
+  Serial.print(F("{\"type\": \"support\", \"body\": \""));
+  Serial.print(F("Simtron v"));
+  Serial.print(F(VERSION));
+  Serial.print(F(" get support at https://github.com/wyunreal/simtron"));
+  Serial.println(F("\"}"));
+}
+
