@@ -1,6 +1,7 @@
 #include <SoftwareSerial.h>
 #include <Input.h>
 #include <string.h>
+#include <avr/wdt.h>
 
 #define RX 10
 #define TX 11
@@ -68,31 +69,31 @@ int headElementsPart;
 SoftwareSerial sim(RX, TX);
 Input input;
 
-void enableCommand(CommandParam** params, Stream* response) {
-  int channel = params[0]->asInt();
+void enableCommand(CommandParams &params, Stream &response) {
+  int channel = params.getParamAsInt(0);
   if (channel >= 0 && channel < CHANNEL_COUNT) {
     ChannelStatusData* status = enableChannel(channel);
     printChannelStatusJson(status, false, true);
   }
 }
 
-void disableCommand(CommandParam** params, Stream* response) {
-  int channel = params[0]->asInt();
+void disableCommand(CommandParams &params, Stream &response) {
+  int channel = params.getParamAsInt(0);
   if (channel >= 0 && channel < CHANNEL_COUNT) {
     ChannelStatusData* status = disableChannel(channel);
     printChannelStatusJson(status, false, true);
   }
 }
 
-void statusCommand(CommandParam** params, Stream* response) {
-  int channel = params[0]->asInt();
+void statusCommand(CommandParams &params, Stream &response) {
+  int channel = params.getParamAsInt(0);
   if (channel >= 0 && channel < CHANNEL_COUNT) {
     readStatus(channel);
     printChannelStatusJson(&channelsStatus[channel], false, true);
   }
 }
 
-void catalogCommand(CommandParam** params, Stream* response) {
+void catalogCommand(CommandParams &params, Stream &response) {
   int currentlySelectedChannel = selectedChannel;
   for (int i = 0; i < CHANNEL_COUNT; i++) {
     if (readStatus(i)) {
@@ -101,6 +102,7 @@ void catalogCommand(CommandParam** params, Stream* response) {
   }
   selectedChannel = currentlySelectedChannel;
 }
+
 bool readStatus(int channel) {
   selectChannel(channel);
   if (readIcc(channel)) {
@@ -112,7 +114,7 @@ bool readStatus(int channel) {
   }
 }
 
-InputCommand* commandDefinitions[] = defineCommands(
+const InputCommand commandDefinitions[] PROGMEM = defineCommands(
   command("enable", 1, &enableCommand),
   command("disable", 1, &disableCommand),
   command("status", 1, &statusCommand),
@@ -120,6 +122,8 @@ InputCommand* commandDefinitions[] = defineCommands(
 );
 
 void setup() {
+  wdt_disable();
+
   input.begin(9600, commandDefinitions);
 
   printBootingUpMessage();
@@ -140,6 +144,8 @@ void setup() {
 
   sim.begin(9600);
 
+  wdt_enable(WDTO_8S);
+
   printBootCompleteMessage();
 }
 
@@ -154,6 +160,8 @@ void loop() {
   }
 
   selectNextChannel();
+
+  wdt_reset();
 }
 
 ChannelStatusData* initChannel(int channel, bool enable) {
