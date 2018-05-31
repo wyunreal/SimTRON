@@ -67,7 +67,12 @@ int smsParserState;
 int headElementsPart;
 
 SoftwareSerial sim(RX, TX);
-Input input;
+Input input(50);
+
+void resetCommand(CommandParams &params, Stream &response) {
+  wdt_enable(WDTO_15MS);
+  while(true);
+}
 
 void enableCommand(CommandParams &params, Stream &response) {
   int channel = params.getParamAsInt(0);
@@ -98,6 +103,7 @@ void catalogCommand(CommandParams &params, Stream &response) {
   for (int i = 0; i < CHANNEL_COUNT; i++) {
     if (readStatus(i)) {
       printChannelStatusJson(&channelsStatus[i], false, true);
+      wdt_reset();
     }
   }
   selectedChannel = currentlySelectedChannel;
@@ -114,11 +120,23 @@ bool readStatus(int channel) {
   }
 }
 
+void sendSmsCommand(CommandParams &params, Stream &response) {
+  int channel = params.getParamAsInt(0);
+  if (channel >= 0 && channel < CHANNEL_COUNT) {
+    char* msisdn = params.getParamAsString(1);
+    char* sms = params.getParamAsString(2);
+    selectChannel(channel);
+    sendSmsToMsisdn(msisdn, sms);
+  }
+}
+
 const InputCommand commandDefinitions[] PROGMEM = defineCommands(
+  command("reset", 0, &resetCommand),
   command("enable", 1, &enableCommand),
   command("disable", 1, &disableCommand),
   command("status", 1, &statusCommand),
-  command("catalog", 0, &catalogCommand)
+  command("catalog", 0, &catalogCommand),
+  command("sendSms", 3, &sendSmsCommand)
 );
 
 void setup() {
@@ -306,6 +324,26 @@ NetworkRegistrationStatus parseNetworkStatus(char* networkStatusResponseData) {
   return UNKNOWN;
 }
 
+void sendSmsToMsisdn(const char* msisdn, const char* sms) {
+  sim.write("AT+CMGF=1\r");
+  bool statusReadCorrectly = readModemResponse(simData);
+  if (!statusReadCorrectly) {
+     printErrorSendingSmsMessage();
+     return;
+  }
+  sim.write("AT+CMGS=\"");
+  sim.write(msisdn);
+  sim.write("\"\r");
+  readModemResponse(simData);
+  sim.write(sms);
+  sim.write("\r");
+  readModemResponse(simData);
+  sim.write(0x1A);
+  readModemResponse(simData);
+
+  printSmsSentMessage();
+}
+
 bool readSmsAtIndex(int index) {
   sim.print(F("AT+CMGF=1\r"));
   bool modemInSmsMode = readModemResponse(simData);
@@ -421,16 +459,25 @@ void printSmsJson(SmsData* smsData) {
   Serial.print(F("\", \"msisdn\": \""));
   Serial.print(channelsStatus[selectedChannel].msisdn);
   Serial.print(F("\", \"sender\": \""));
-  Serial.print(smsData->sender);
+  printStringEscapingQuotes(smsData->sender);
   Serial.print(F("\", \"datetime\": \""));
-  Serial.print(smsData->date);
+  printStringEscapingQuotes(smsData->date);
   Serial.print(F(","));
-  Serial.print(smsData->time);
+  printStringEscapingQuotes(smsData->time);
   Serial.print(F("\", \"body\": \""));
-  Serial.print(smsData->body);
+  printStringEscapingQuotes(smsData->body);
   Serial.println(F("\"}"));
 }
 
+void printStringEscapingQuotes(char* str) {
+  while (str[0] != 0) {
+    if (str[0] == '"') {
+      Serial.print("\\");
+    }
+    Serial.print(str[0]);
+    str++;
+  }
+}
 
 void printChannelStatusJson(ChannelStatusData* statusData, bool isStatusUpdate, bool printEndOfLine) {
   Serial.print(F("{\"type\": \""));
@@ -501,3 +548,10 @@ void printBootCompleteMessage() {
   Serial.println(F("{\"type\": \"booting\", \"body\": \"System ready...\"}"));
 }
 
+void printErrorSendingSmsMessage() {
+  Serial.println(F("{\"type\": \"error\", \"body\": \"Error sending SMS\"}"));
+}
+
+void printSmsSentMessage() {
+  Serial.println(F("{\"type\": \"info\", \"body\": \"SMS sent\"}"));
+}
