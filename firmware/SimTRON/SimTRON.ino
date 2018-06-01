@@ -84,7 +84,7 @@ void enableCommand(CommandParams &params, Stream &response) {
   int channel = params.getParamAsInt(0);
   if (channel >= 0 && channel < CHANNEL_COUNT) {
     ChannelStatusData* status = enableChannel(channel);
-    printChannelStatusJson(status, false, true);
+    printChannelStatusJson(status);
   }
 }
 
@@ -92,7 +92,7 @@ void disableCommand(CommandParams &params, Stream &response) {
   int channel = params.getParamAsInt(0);
   if (channel >= 0 && channel < CHANNEL_COUNT) {
     ChannelStatusData* status = disableChannel(channel);
-    printChannelStatusJson(status, false, true);
+    printChannelStatusJson(status);
   }
 }
 
@@ -100,29 +100,25 @@ void statusCommand(CommandParams &params, Stream &response) {
   int channel = params.getParamAsInt(0);
   if (channel >= 0 && channel < CHANNEL_COUNT) {
     readStatus(channel);
-    printChannelStatusJson(&channelsStatus[channel], false, true);
+    printChannelStatusJson(&channelsStatus[channel]);
   }
 }
 
 void catalogCommand(CommandParams &params, Stream &response) {
   int currentlySelectedChannel = selectedChannel;
   for (int i = 0; i < CHANNEL_COUNT; i++) {
-    if (readStatus(i)) {
-      printChannelStatusJson(&channelsStatus[i], false, true);
-      wdt_reset();
-    }
+    readStatus(i);
+    printChannelStatusJson(&channelsStatus[i]);
+    wdt_reset();
   }
   selectedChannel = currentlySelectedChannel;
 }
 
-bool readStatus(int channel) {
+void readStatus(int channel) {
   selectChannel(channel);
   if (readIcc(channel)) {
     readMsisdn(channel);
     readNetworkStatus(channel);
-    return true;
-  } else {
-    return false;
   }
 }
 
@@ -486,9 +482,9 @@ void printStringEscapingQuotes(char* str) {
   }
 }
 
-void printChannelStatusJson(ChannelStatusData* statusData, bool isStatusUpdate, bool printEndOfLine) {
+void printChannelStatusJson(ChannelStatusData* statusData) {
   Serial.print(F("{\"type\": \""));
-  Serial.print(isStatusUpdate ? F("statusUpdate") : F("status"));
+  Serial.print(F("status"));
   Serial.print(F("\", \"channel\": "));
   Serial.print(statusData->channel);
   Serial.print(F(", \"isEnabled\": "));
@@ -544,7 +540,7 @@ void printChannelStatusJson(ChannelStatusData* statusData, bool isStatusUpdate, 
   } else {
     Serial.print(F("Channel disabled"));
   }
-  printEndOfLine ? Serial.println(F("\"}")) : Serial.print(F("\"}"));
+  Serial.println(F("\"}"));
 }
 
 void printBootingUpMessage() {
