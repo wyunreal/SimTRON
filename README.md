@@ -15,7 +15,7 @@ This repo contains source code and hardware specifications for building a 8 SIMs
 | Raspberry PI Zero W Starter kit | https://www.amazon.es/PiHut-Zero-Essentials-Kit-Raspberry/dp/B06XCYGP27/ref=sr_1_5?ie=UTF8&qid=1528790276&sr=8-5&keywords=raspberry+pi+zero+w | 25 € | 1 | 25 € |
 | Manufactoring at China | https://www.pcbway.com/ | 10 € | 1 | 10 € |
 
-
+Total price: 150.91 €
 
 # Burning the firmware to Arduino Pro Mini
 
