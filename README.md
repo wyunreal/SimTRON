@@ -19,7 +19,7 @@ Total price: 150.91 €
 
 # Burning the firmware to Arduino Pro Mini
 
-As the firmware enables the Watch Dog Timer, in order to bein able using an Arduino Pro Mini, you need to burn the Arduino UNO bootloader first, this is completely safe as Arduino Pro Mini is a tiny but full featured version of the Arduino UNO.
+As the firmware enables the Watch Dog Timer, in order to being able using an Arduino Pro Mini, you need to burn the Arduino UNO bootloader first, this is completely safe as Arduino Pro Mini is a tiny but full featured version of the Arduino UNO.
 
 Follow these instructions to burn the bootloader using another arduino as programmer:
 
