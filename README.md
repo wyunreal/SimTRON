@@ -17,7 +17,7 @@ This repo contains source code and hardware specifications for building a 8 SIMs
 | Micro ATX enclosure | https://www.amazon.es/gp/product/B00TKP0E34/ref=oh_aui_detailpage_o01_s00?ie=UTF8&psc=1 | 46.95 € | 1 | 46.95 € |
 | Manufactoring at China | https://www.pcbway.com/ | 10 € | 1 | 10 € |
 
-Total price:  €
+Total price: 205.85 €
 
 # Burning the firmware to Arduino Pro Mini
 
