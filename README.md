@@ -8,7 +8,7 @@ This repo contains source code and hardware specifications for building a 8 SIMs
 
 | Name | link | Unit price | Quantity | Total price |
 |------|------|------------|----------|-------------|
-| IC 74HC4051 | http://www.digital-sa.com/tienda/product_info.php?products_id=2479 | 0.50 € | 2 | 1.0 € |
+| IC 74HC4051 | https://www.amazon.es/cd74hc4051e-Analog-Channel-CKT-16-Ti/dp/B01JV6VPJ8/ref=sr_1_fkmr1_1?ie=UTF8&qid=1528913467&sr=8-1-fkmr1&keywords=analog+mux+4051 | 3.50 € | 1 | 3.50 € |
 | GPRS SIm800L Modem | https://www.amazon.es/Sharplace-SIM800L-Tarjeta-Cuatribanda-QUAD-BAND/dp/B075D9ZYPW/ref=sr_1_16?ie=UTF8&qid=1528789781&sr=8-16&keywords=sim800l | 12.99 € | 8 | 103.92 € |
 | Arduino Pro Mini 328P | https://www.amazon.es/Arduino-ATMEGA328-Avr328P-desarrollo-development/dp/B01DLPAAAK/ref=sr_1_2?ie=UTF8&qid=1528790069&sr=8-2&keywords=arduino+pro+mini | 5 € | 1 | 5 € |
 | FTDI USB Adapter | https://www.amazon.es/tinxi%C2%AE-FT232RL-adaptador-convertidor-Arduino/dp/B01C2P9GD2/ref=sr_1_8?s=electronics&ie=UTF8&qid=1528790180&sr=1-8&keywords=ftdi+usb | 5.99 € | 1 | 5.99 € |
@@ -17,7 +17,7 @@ This repo contains source code and hardware specifications for building a 8 SIMs
 | Micro ATX enclosure | https://www.amazon.es/gp/product/B00TKP0E34/ref=oh_aui_detailpage_o01_s00?ie=UTF8&psc=1 | 46.95 € | 1 | 46.95 € |
 | Manufactoring at China | https://www.pcbway.com/ | 10 € | 1 | 10 € |
 
-Total price: 205.85 €
+Total price: 208.35 €
 
 # Burning the firmware to Arduino Pro Mini
 
