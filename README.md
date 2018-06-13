@@ -12,7 +12,7 @@ This repo contains source code and hardware specifications for building a 8 SIMs
 | GPRS SIm800L Modem | https://www.amazon.es/Sharplace-SIM800L-Tarjeta-Cuatribanda-QUAD-BAND/dp/B075D9ZYPW/ref=sr_1_16?ie=UTF8&qid=1528789781&sr=8-16&keywords=sim800l | 12.99 € | 8 | 103.92 € |
 | Arduino Pro Mini 328P | https://www.amazon.es/Arduino-ATMEGA328-Avr328P-desarrollo-development/dp/B01DLPAAAK/ref=sr_1_2?ie=UTF8&qid=1528790069&sr=8-2&keywords=arduino+pro+mini | 5 € | 1 | 5 € |
 | FTDI USB Adapter | https://www.amazon.es/tinxi%C2%AE-FT232RL-adaptador-convertidor-Arduino/dp/B01C2P9GD2/ref=sr_1_8?s=electronics&ie=UTF8&qid=1528790180&sr=1-8&keywords=ftdi+usb | 5.99 € | 1 | 5.99 € |
-| Mini USB to Micro USB cable | https://www.amazon.es/Extensi%C3%B3n-Adaptador-Dispositivo-Charger-Converter/dp/B01MEDCEBJ/ref=sr_1_6?s=electronics&ie=UTF8&qid=1528911416&sr=1-6&keywords=mini+usb+to+micro+usb | 7.99 € | 1 | 5.99 € |
+| Mini USB to Micro USB cable | https://www.amazon.es/Extensi%C3%B3n-Adaptador-Dispositivo-Charger-Converter/dp/B01MEDCEBJ/ref=sr_1_6?s=electronics&ie=UTF8&qid=1528911416&sr=1-6&keywords=mini+usb+to+micro+usb | 7.99 € | 1 | 7.99 € |
 | Raspberry PI Zero W Starter kit | https://www.amazon.es/PiHut-Zero-Essentials-Kit-Raspberry/dp/B06XCYGP27/ref=sr_1_5?ie=UTF8&qid=1528790276&sr=8-5&keywords=raspberry+pi+zero+w | 25 € | 1 | 25 € |
 | Micro ATX enclosure | https://www.amazon.es/gp/product/B00TKP0E34/ref=oh_aui_detailpage_o01_s00?ie=UTF8&psc=1 | 46.95 € | 1 | 46.95 € |
 | Manufactoring at China | https://www.pcbway.com/ | 10 € | 1 | 10 € |
