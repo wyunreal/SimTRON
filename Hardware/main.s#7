@@ -1590,13 +1590,13 @@ Source: http://download.siliconexpert.com/pdfs/2005/02/24/Semi_Ap/2/VSH/Resistor
 <part name="GND10" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="GND11" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="GND12" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
-<part name="GSMPWR" library="con-molex" library_urn="urn:adsk.eagle:library:165" deviceset="22-23-2021" device="" value="VCC   GND">
+<part name="GSMPOWER" library="con-molex" library_urn="urn:adsk.eagle:library:165" deviceset="22-23-2021" device="">
 <attribute name="SPICEPREFIX" value="X"/>
 </part>
 <part name="GND13" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="GND14" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="GND15" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
-<part name="LPWR" library="con-molex" library_urn="urn:adsk.eagle:library:165" deviceset="22-23-2021" device="" value="VCC   GND">
+<part name="LPOWER" library="con-molex" library_urn="urn:adsk.eagle:library:165" deviceset="22-23-2021" device="">
 <attribute name="SPICEPREFIX" value="X"/>
 </part>
 <part name="GND16" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
@@ -1613,9 +1613,9 @@ Source: http://download.siliconexpert.com/pdfs/2005/02/24/Semi_Ap/2/VSH/Resistor
 <part name="VDD7" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="VDD" device=""/>
 <part name="VDD8" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="VDD" device=""/>
 <part name="VDD9" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="VDD" device=""/>
-<part name="ATXE" library="jumper" library_urn="urn:adsk.eagle:library:252" deviceset="JP1E" device="" package3d_urn="urn:adsk.eagle:package:15455/1" value="EN"/>
-<part name="RSW" library="jumper" library_urn="urn:adsk.eagle:library:252" deviceset="JP1E" device="" package3d_urn="urn:adsk.eagle:package:15455/1" value=" "/>
-<part name="PSW" library="jumper" library_urn="urn:adsk.eagle:library:252" deviceset="JP1E" device="" package3d_urn="urn:adsk.eagle:package:15455/1" value=" "/>
+<part name="JP1" library="jumper" library_urn="urn:adsk.eagle:library:252" deviceset="JP1E" device="" package3d_urn="urn:adsk.eagle:package:15455/1"/>
+<part name="JP2" library="jumper" library_urn="urn:adsk.eagle:library:252" deviceset="JP1E" device="" package3d_urn="urn:adsk.eagle:package:15455/1"/>
+<part name="JP3" library="jumper" library_urn="urn:adsk.eagle:library:252" deviceset="JP1E" device="" package3d_urn="urn:adsk.eagle:package:15455/1"/>
 <part name="R1" library="eagle-ltspice" library_urn="urn:adsk.eagle:library:217" deviceset="R" device="0204/7" package3d_urn="urn:adsk.eagle:package:13274/1" value="10K"/>
 <part name="GND17" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="P+5" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="VCC" device=""/>
@@ -1652,15 +1652,15 @@ Source: http://download.siliconexpert.com/pdfs/2005/02/24/Semi_Ap/2/VSH/Resistor
 <instance part="GND10" gate="1" x="48.26" y="76.2"/>
 <instance part="GND11" gate="1" x="76.2" y="58.42"/>
 <instance part="GND12" gate="1" x="132.08" y="58.42"/>
-<instance part="GSMPWR" gate="-1" x="-17.78" y="93.98"/>
-<instance part="GSMPWR" gate="-2" x="-17.78" y="91.44"/>
+<instance part="GSMPOWER" gate="-1" x="-17.78" y="93.98"/>
+<instance part="GSMPOWER" gate="-2" x="-17.78" y="91.44"/>
 <instance part="GND13" gate="1" x="-20.32" y="88.9"/>
 <instance part="RXMUX" gate="P" x="116.84" y="68.58"/>
 <instance part="TXMUX" gate="P" x="172.72" y="68.58"/>
 <instance part="GND14" gate="1" x="111.76" y="53.34"/>
 <instance part="GND15" gate="1" x="167.64" y="53.34"/>
-<instance part="LPWR" gate="-1" x="-17.78" y="114.3"/>
-<instance part="LPWR" gate="-2" x="-17.78" y="111.76"/>
+<instance part="LPOWER" gate="-1" x="-17.78" y="114.3"/>
+<instance part="LPOWER" gate="-2" x="-17.78" y="111.76"/>
 <instance part="GND16" gate="1" x="-20.32" y="109.22"/>
 <instance part="P+1" gate="VCC" x="-20.32" y="119.38"/>
 <instance part="P+2" gate="VCC" x="48.26" y="83.82"/>
@@ -1675,9 +1675,9 @@ Source: http://download.siliconexpert.com/pdfs/2005/02/24/Semi_Ap/2/VSH/Resistor
 <instance part="VDD7" gate="G$1" x="99.06" y="0"/>
 <instance part="VDD8" gate="G$1" x="121.92" y="0"/>
 <instance part="VDD9" gate="G$1" x="144.78" y="0"/>
-<instance part="ATXE" gate="A" x="25.4" y="114.3"/>
-<instance part="RSW" gate="A" x="38.1" y="114.3"/>
-<instance part="PSW" gate="A" x="50.8" y="114.3"/>
+<instance part="JP1" gate="A" x="25.4" y="114.3"/>
+<instance part="JP2" gate="A" x="38.1" y="114.3"/>
+<instance part="JP3" gate="A" x="50.8" y="114.3"/>
 <instance part="R1" gate="G$1" x="45.72" y="114.3" rot="R90"/>
 <instance part="GND17" gate="1" x="45.72" y="106.68"/>
 <instance part="P+5" gate="VCC" x="55.88" y="121.92"/>
@@ -1824,7 +1824,7 @@ Source: http://download.siliconexpert.com/pdfs/2005/02/24/Semi_Ap/2/VSH/Resistor
 <wire x1="139.7" y1="60.96" x2="132.08" y2="60.96" width="0.1524" layer="91"/>
 </segment>
 <segment>
-<pinref part="GSMPWR" gate="-2" pin="S"/>
+<pinref part="GSMPOWER" gate="-2" pin="S"/>
 <pinref part="GND13" gate="1" pin="GND"/>
 </segment>
 <segment>
@@ -1844,11 +1844,11 @@ Source: http://download.siliconexpert.com/pdfs/2005/02/24/Semi_Ap/2/VSH/Resistor
 <junction x="167.64" y="60.96"/>
 </segment>
 <segment>
-<pinref part="LPWR" gate="-2" pin="S"/>
+<pinref part="LPOWER" gate="-2" pin="S"/>
 <pinref part="GND16" gate="1" pin="GND"/>
 </segment>
 <segment>
-<pinref part="ATXE" gate="A" pin="2"/>
+<pinref part="JP1" gate="A" pin="2"/>
 <pinref part="GND19" gate="1" pin="GND"/>
 <wire x1="27.94" y1="111.76" x2="27.94" y2="109.22" width="0.1524" layer="91"/>
 </segment>
@@ -2181,7 +2181,7 @@ Source: http://download.siliconexpert.com/pdfs/2005/02/24/Semi_Ap/2/VSH/Resistor
 </net>
 <net name="VCC" class="0">
 <segment>
-<pinref part="LPWR" gate="-1" pin="S"/>
+<pinref part="LPOWER" gate="-1" pin="S"/>
 <wire x1="-20.32" y1="116.84" x2="-20.32" y2="114.3" width="0.1524" layer="91"/>
 <label x="-17.78" y="119.38" size="1.778" layer="95"/>
 <pinref part="P+1" gate="VCC" pin="VCC"/>
@@ -2205,13 +2205,13 @@ Source: http://download.siliconexpert.com/pdfs/2005/02/24/Semi_Ap/2/VSH/Resistor
 <pinref part="P+4" gate="VCC" pin="VCC"/>
 </segment>
 <segment>
-<pinref part="PSW" gate="A" pin="2"/>
+<pinref part="JP3" gate="A" pin="2"/>
 <wire x1="53.34" y1="111.76" x2="55.88" y2="111.76" width="0.1524" layer="91"/>
 <pinref part="P+5" gate="VCC" pin="VCC"/>
 <wire x1="55.88" y1="111.76" x2="55.88" y2="119.38" width="0.1524" layer="91"/>
 </segment>
 <segment>
-<pinref part="RSW" gate="A" pin="2"/>
+<pinref part="JP2" gate="A" pin="2"/>
 <wire x1="40.64" y1="111.76" x2="43.18" y2="111.76" width="0.1524" layer="91"/>
 <pinref part="P+6" gate="VCC" pin="VCC"/>
 <wire x1="43.18" y1="111.76" x2="43.18" y2="119.38" width="0.1524" layer="91"/>
@@ -2219,7 +2219,7 @@ Source: http://download.siliconexpert.com/pdfs/2005/02/24/Semi_Ap/2/VSH/Resistor
 </net>
 <net name="VDD" class="0">
 <segment>
-<pinref part="GSMPWR" gate="-1" pin="S"/>
+<pinref part="GSMPOWER" gate="-1" pin="S"/>
 <wire x1="-20.32" y1="96.52" x2="-20.32" y2="93.98" width="0.1524" layer="91"/>
 <label x="-22.86" y="88.9" size="1.778" layer="95" rot="R90"/>
 <pinref part="VDD1" gate="G$1" pin="VDD"/>
@@ -2322,7 +2322,7 @@ Source: http://download.siliconexpert.com/pdfs/2005/02/24/Semi_Ap/2/VSH/Resistor
 <wire x1="43.18" y1="60.96" x2="58.42" y2="60.96" width="0.1524" layer="91"/>
 <wire x1="58.42" y1="60.96" x2="58.42" y2="99.06" width="0.1524" layer="91"/>
 <wire x1="58.42" y1="99.06" x2="38.1" y2="99.06" width="0.1524" layer="91"/>
-<pinref part="RSW" gate="A" pin="1"/>
+<pinref part="JP2" gate="A" pin="1"/>
 <wire x1="38.1" y1="99.06" x2="38.1" y2="111.76" width="0.1524" layer="91"/>
 <wire x1="38.1" y1="111.76" x2="35.56" y2="111.76" width="0.1524" layer="91"/>
 <junction x="38.1" y="111.76"/>
@@ -2336,14 +2336,14 @@ Source: http://download.siliconexpert.com/pdfs/2005/02/24/Semi_Ap/2/VSH/Resistor
 <wire x1="55.88" y1="96.52" x2="55.88" y2="71.12" width="0.1524" layer="91"/>
 <pinref part="ARDUINO" gate="G$1" pin="A3"/>
 <wire x1="55.88" y1="71.12" x2="43.18" y2="71.12" width="0.1524" layer="91"/>
-<pinref part="ATXE" gate="A" pin="1"/>
+<pinref part="JP1" gate="A" pin="1"/>
 <wire x1="55.88" y1="96.52" x2="25.4" y2="96.52" width="0.1524" layer="91"/>
 <wire x1="25.4" y1="96.52" x2="25.4" y2="111.76" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$9" class="0">
 <segment>
-<pinref part="PSW" gate="A" pin="1"/>
+<pinref part="JP3" gate="A" pin="1"/>
 <wire x1="50.8" y1="111.76" x2="50.8" y2="101.6" width="0.1524" layer="91"/>
 <wire x1="60.96" y1="58.42" x2="60.96" y2="101.6" width="0.1524" layer="91"/>
 <pinref part="ARDUINO" gate="G$1" pin="D12"/>
