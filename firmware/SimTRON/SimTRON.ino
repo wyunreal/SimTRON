@@ -8,6 +8,11 @@
 #define RX 10
 #define TX 11
 
+#define ATX_ENABLE A0
+#define POWER_SW 12
+#define RESET_SW 13
+#define BUTTON_PRESSED_THRESHOLD 2
+
 #define CHANNEL_COUNT 8
 #define CHANNEL_S0 A1
 #define CHANNEL_S1 A2
@@ -48,6 +53,11 @@ struct ChannelStatusData {
   NetworkRegistrationStatus registrationStatus;
 };
 
+// power control
+byte isPowerOn = true;
+byte powerSwCount = 0;
+byte resetSwCount = 0;
+
 // Channels control
 int channelEnablePin[] { 2, 3, 4, 5, 6, 7, 8, 9};
 ChannelStatusData channelsStatus[8];
@@ -71,9 +81,13 @@ int headElementsPart;
 SoftwareSerial sim(RX, TX);
 Input input(50);
 
-void resetCommand(CommandParams &params, Stream &response) {
+void doReset() {
   wdt_enable(WDTO_15MS);
   while(true);
+}
+
+void resetCommand(CommandParams &params, Stream &response) {
+  doReset();
 }
 
 void supportCommand(CommandParams &params, Stream &response) {
@@ -142,12 +156,27 @@ const InputCommand commandDefinitions[] PROGMEM = defineCommands(
   command("sendSms", 3, &sendSmsCommand)
 );
 
+void enablePower() {
+  digitalWrite(ATX_ENABLE, LOW);
+}
+
+void disablePower() {
+  digitalWrite(ATX_ENABLE, HIGH);
+}
+
 void setup() {
   wdt_disable();
 
   input.begin(9600, commandDefinitions);
 
   printBootingUpMessage();
+
+  pinMode(POWER_SW, INPUT);
+  pinMode(RESET_SW, INPUT);
+  pinMode(ATX_ENABLE, OUTPUT);
+  disablePower();
+  delay(1000); // wait for ATX power stabilization
+  enablePower();
 
   pinMode(CHANNEL_S0, OUTPUT);
   pinMode(CHANNEL_S1, OUTPUT);
@@ -159,7 +188,7 @@ void setup() {
   }
   for (int i = 0; i < CHANNEL_COUNT; i++) {
     enableChannel(i);
-    delay(1000);
+    delay(1000); // wait for GSM boot up current peak
   }
   selectChannel(0);
 
@@ -168,6 +197,33 @@ void setup() {
   wdt_enable(WDTO_8S);
 
   printBootCompleteMessage();
+}
+
+void updateButtonCounters(byte buttonPin, byte &counter) {
+  if (digitalRead(buttonPin)) {
+    counter++;
+  } else {
+    if (counter > 0) {
+      counter--;
+    }
+  }
+}
+
+void checkPowerButtons() {
+  updateButtonCounters(POWER_SW, powerSwCount);
+  updateButtonCounters(RESET_SW, resetSwCount);
+  if (powerSwCount >= BUTTON_PRESSED_THRESHOLD) {
+    if (isPowerOn) {
+      isPowerOn = false;
+      disablePower();
+    } else {
+      isPowerOn = true;
+      enablePower();
+    }
+  }
+  if (resetSwCount >= BUTTON_PRESSED_THRESHOLD) {
+    doReset();
+  }
 }
 
 void loop() {
@@ -179,6 +235,8 @@ void loop() {
       deleteSmsAtIndex(FIRST_SMS_INDEX);
     }
   }
+
+  checkPowerButtons();
 
   selectNextChannel();
 
@@ -487,7 +545,9 @@ void printChannelStatusJson(ChannelStatusData* statusData) {
   Serial.print(F("status"));
   Serial.print(F("\", \"channel\": "));
   Serial.print(statusData->channel);
-  Serial.print(F(", \"isEnabled\": "));
+  Serial.print(F(", \"power\": \""));
+  Serial.print(isPowerOn ? F("on") : F("off"));
+  Serial.print(F("\", \"isEnabled\": "));
   Serial.print(statusData->isEnabled);
   Serial.print(F(", \"icc\": \""));
   Serial.print(statusData->icc);
