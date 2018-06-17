@@ -1609,10 +1609,6 @@ Source: http://download.siliconexpert.com/pdfs/2005/02/24/Semi_Ap/2/VSH/Resistor
 <part name="VDD3" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="VDD" device=""/>
 <part name="VDD4" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="VDD" device=""/>
 <part name="VDD5" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="VDD" device=""/>
-<part name="VDD6" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="VDD" device=""/>
-<part name="VDD7" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="VDD" device=""/>
-<part name="VDD8" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="VDD" device=""/>
-<part name="VDD9" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="VDD" device=""/>
 <part name="ATXE" library="jumper" library_urn="urn:adsk.eagle:library:252" deviceset="JP1E" device="" package3d_urn="urn:adsk.eagle:package:15455/1" value="EN"/>
 <part name="RSW" library="jumper" library_urn="urn:adsk.eagle:library:252" deviceset="JP1E" device="" package3d_urn="urn:adsk.eagle:package:15455/1" value=" "/>
 <part name="PSW" library="jumper" library_urn="urn:adsk.eagle:library:252" deviceset="JP1E" device="" package3d_urn="urn:adsk.eagle:package:15455/1" value=" "/>
@@ -1623,6 +1619,12 @@ Source: http://download.siliconexpert.com/pdfs/2005/02/24/Semi_Ap/2/VSH/Resistor
 <part name="GND18" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="P+6" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="VCC" device=""/>
 <part name="GND19" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
+<part name="GSMPWR2" library="con-molex" library_urn="urn:adsk.eagle:library:165" deviceset="22-23-2021" device="" value="VCC   GND">
+<attribute name="SPICEPREFIX" value="X"/>
+</part>
+<part name="GND20" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
+<part name="VDD6" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="VDD" device=""/>
+<part name="JP1" library="jumper" library_urn="urn:adsk.eagle:library:252" deviceset="JP1E" device="" package3d_urn="urn:adsk.eagle:package:15455/1" value=" "/>
 </parts>
 <sheets>
 <sheet>
@@ -1671,20 +1673,21 @@ Source: http://download.siliconexpert.com/pdfs/2005/02/24/Semi_Ap/2/VSH/Resistor
 <instance part="VDD3" gate="G$1" x="7.62" y="0"/>
 <instance part="VDD4" gate="G$1" x="30.48" y="0"/>
 <instance part="VDD5" gate="G$1" x="53.34" y="0"/>
-<instance part="VDD6" gate="G$1" x="76.2" y="0"/>
-<instance part="VDD7" gate="G$1" x="99.06" y="0"/>
-<instance part="VDD8" gate="G$1" x="121.92" y="0"/>
-<instance part="VDD9" gate="G$1" x="144.78" y="0"/>
-<instance part="ATXE" gate="A" x="25.4" y="114.3"/>
+<instance part="ATXE" gate="A" x="15.24" y="114.3"/>
 <instance part="RSW" gate="A" x="38.1" y="114.3"/>
-<instance part="PSW" gate="A" x="50.8" y="114.3"/>
-<instance part="R1" gate="G$1" x="45.72" y="114.3" rot="R90"/>
-<instance part="GND17" gate="1" x="45.72" y="106.68"/>
-<instance part="P+5" gate="VCC" x="55.88" y="121.92"/>
-<instance part="R2" gate="G$1" x="33.02" y="114.3" rot="R90"/>
-<instance part="GND18" gate="1" x="33.02" y="106.68"/>
+<instance part="PSW" gate="A" x="58.42" y="114.3"/>
+<instance part="R1" gate="G$1" x="48.26" y="114.3" rot="R90"/>
+<instance part="GND17" gate="1" x="48.26" y="106.68"/>
+<instance part="P+5" gate="VCC" x="63.5" y="121.92"/>
+<instance part="R2" gate="G$1" x="27.94" y="114.3" rot="R90"/>
+<instance part="GND18" gate="1" x="27.94" y="106.68"/>
 <instance part="P+6" gate="VCC" x="43.18" y="121.92"/>
-<instance part="GND19" gate="1" x="27.94" y="106.68"/>
+<instance part="GND19" gate="1" x="20.32" y="109.22"/>
+<instance part="GSMPWR2" gate="-1" x="180.34" y="15.24"/>
+<instance part="GSMPWR2" gate="-2" x="180.34" y="12.7"/>
+<instance part="GND20" gate="1" x="177.8" y="10.16"/>
+<instance part="VDD6" gate="G$1" x="177.8" y="33.02"/>
+<instance part="JP1" gate="A" x="185.42" y="30.48"/>
 </instances>
 <busses>
 <bus name="ADDR[0..2]">
@@ -1850,7 +1853,7 @@ Source: http://download.siliconexpert.com/pdfs/2005/02/24/Semi_Ap/2/VSH/Resistor
 <segment>
 <pinref part="ATXE" gate="A" pin="2"/>
 <pinref part="GND19" gate="1" pin="GND"/>
-<wire x1="27.94" y1="111.76" x2="27.94" y2="109.22" width="0.1524" layer="91"/>
+<wire x1="17.78" y1="111.76" x2="20.32" y2="111.76" width="0.1524" layer="91"/>
 </segment>
 <segment>
 <pinref part="GND17" gate="1" pin="GND"/>
@@ -1859,6 +1862,10 @@ Source: http://download.siliconexpert.com/pdfs/2005/02/24/Semi_Ap/2/VSH/Resistor
 <segment>
 <pinref part="R2" gate="G$1" pin="1"/>
 <pinref part="GND18" gate="1" pin="GND"/>
+</segment>
+<segment>
+<pinref part="GSMPWR2" gate="-2" pin="S"/>
+<pinref part="GND20" gate="1" pin="GND"/>
 </segment>
 </net>
 <net name="ADDR0" class="0">
@@ -2206,9 +2213,9 @@ Source: http://download.siliconexpert.com/pdfs/2005/02/24/Semi_Ap/2/VSH/Resistor
 </segment>
 <segment>
 <pinref part="PSW" gate="A" pin="2"/>
-<wire x1="53.34" y1="111.76" x2="55.88" y2="111.76" width="0.1524" layer="91"/>
+<wire x1="60.96" y1="111.76" x2="63.5" y2="111.76" width="0.1524" layer="91"/>
 <pinref part="P+5" gate="VCC" pin="VCC"/>
-<wire x1="55.88" y1="111.76" x2="55.88" y2="119.38" width="0.1524" layer="91"/>
+<wire x1="63.5" y1="111.76" x2="63.5" y2="119.38" width="0.1524" layer="91"/>
 </segment>
 <segment>
 <pinref part="RSW" gate="A" pin="2"/>
@@ -2272,48 +2279,10 @@ Source: http://download.siliconexpert.com/pdfs/2005/02/24/Semi_Ap/2/VSH/Resistor
 <pinref part="VDD5" gate="G$1" pin="VDD"/>
 </segment>
 <segment>
-<pinref part="GSM5" gate="G$1" pin="1"/>
-<wire x1="83.82" y1="5.08" x2="83.82" y2="-2.54" width="0.1524" layer="91"/>
-<wire x1="83.82" y1="-2.54" x2="76.2" y2="-2.54" width="0.1524" layer="91"/>
-<pinref part="GSM5" gate="G$1" pin="3"/>
-<wire x1="83.82" y1="10.16" x2="88.9" y2="10.16" width="0.1524" layer="91"/>
-<wire x1="88.9" y1="10.16" x2="88.9" y2="5.08" width="0.1524" layer="91"/>
-<wire x1="88.9" y1="5.08" x2="83.82" y2="5.08" width="0.1524" layer="91"/>
-<junction x="83.82" y="5.08"/>
+<pinref part="JP1" gate="A" pin="1"/>
+<wire x1="185.42" y1="27.94" x2="177.8" y2="27.94" width="0.1524" layer="91"/>
 <pinref part="VDD6" gate="G$1" pin="VDD"/>
-</segment>
-<segment>
-<pinref part="GSM6" gate="G$1" pin="1"/>
-<wire x1="106.68" y1="5.08" x2="106.68" y2="-2.54" width="0.1524" layer="91"/>
-<wire x1="106.68" y1="-2.54" x2="99.06" y2="-2.54" width="0.1524" layer="91"/>
-<pinref part="GSM6" gate="G$1" pin="3"/>
-<wire x1="106.68" y1="10.16" x2="111.76" y2="10.16" width="0.1524" layer="91"/>
-<wire x1="111.76" y1="10.16" x2="111.76" y2="5.08" width="0.1524" layer="91"/>
-<wire x1="111.76" y1="5.08" x2="106.68" y2="5.08" width="0.1524" layer="91"/>
-<junction x="106.68" y="5.08"/>
-<pinref part="VDD7" gate="G$1" pin="VDD"/>
-</segment>
-<segment>
-<pinref part="GSM7" gate="G$1" pin="1"/>
-<wire x1="129.54" y1="5.08" x2="129.54" y2="-2.54" width="0.1524" layer="91"/>
-<wire x1="129.54" y1="-2.54" x2="121.92" y2="-2.54" width="0.1524" layer="91"/>
-<pinref part="GSM7" gate="G$1" pin="3"/>
-<wire x1="129.54" y1="10.16" x2="134.62" y2="10.16" width="0.1524" layer="91"/>
-<wire x1="134.62" y1="10.16" x2="134.62" y2="5.08" width="0.1524" layer="91"/>
-<wire x1="134.62" y1="5.08" x2="129.54" y2="5.08" width="0.1524" layer="91"/>
-<junction x="129.54" y="5.08"/>
-<pinref part="VDD8" gate="G$1" pin="VDD"/>
-</segment>
-<segment>
-<pinref part="GSM8" gate="G$1" pin="1"/>
-<wire x1="152.4" y1="5.08" x2="152.4" y2="-2.54" width="0.1524" layer="91"/>
-<wire x1="152.4" y1="-2.54" x2="144.78" y2="-2.54" width="0.1524" layer="91"/>
-<pinref part="GSM8" gate="G$1" pin="3"/>
-<wire x1="152.4" y1="10.16" x2="157.48" y2="10.16" width="0.1524" layer="91"/>
-<wire x1="157.48" y1="10.16" x2="157.48" y2="5.08" width="0.1524" layer="91"/>
-<wire x1="157.48" y1="5.08" x2="152.4" y2="5.08" width="0.1524" layer="91"/>
-<junction x="152.4" y="5.08"/>
-<pinref part="VDD9" gate="G$1" pin="VDD"/>
+<wire x1="177.8" y1="27.94" x2="177.8" y2="30.48" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$5" class="0">
@@ -2324,11 +2293,11 @@ Source: http://download.siliconexpert.com/pdfs/2005/02/24/Semi_Ap/2/VSH/Resistor
 <wire x1="58.42" y1="99.06" x2="38.1" y2="99.06" width="0.1524" layer="91"/>
 <pinref part="RSW" gate="A" pin="1"/>
 <wire x1="38.1" y1="99.06" x2="38.1" y2="111.76" width="0.1524" layer="91"/>
-<wire x1="38.1" y1="111.76" x2="35.56" y2="111.76" width="0.1524" layer="91"/>
+<wire x1="38.1" y1="111.76" x2="33.02" y2="111.76" width="0.1524" layer="91"/>
 <junction x="38.1" y="111.76"/>
-<wire x1="35.56" y1="111.76" x2="35.56" y2="119.38" width="0.1524" layer="91"/>
+<wire x1="33.02" y1="111.76" x2="33.02" y2="119.38" width="0.1524" layer="91"/>
 <pinref part="R2" gate="G$1" pin="2"/>
-<wire x1="35.56" y1="119.38" x2="33.02" y2="119.38" width="0.1524" layer="91"/>
+<wire x1="33.02" y1="119.38" x2="27.94" y2="119.38" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$7" class="0">
@@ -2337,23 +2306,72 @@ Source: http://download.siliconexpert.com/pdfs/2005/02/24/Semi_Ap/2/VSH/Resistor
 <pinref part="ARDUINO" gate="G$1" pin="A3"/>
 <wire x1="55.88" y1="71.12" x2="43.18" y2="71.12" width="0.1524" layer="91"/>
 <pinref part="ATXE" gate="A" pin="1"/>
-<wire x1="55.88" y1="96.52" x2="25.4" y2="96.52" width="0.1524" layer="91"/>
-<wire x1="25.4" y1="96.52" x2="25.4" y2="111.76" width="0.1524" layer="91"/>
+<wire x1="55.88" y1="96.52" x2="15.24" y2="96.52" width="0.1524" layer="91"/>
+<wire x1="15.24" y1="96.52" x2="15.24" y2="111.76" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$9" class="0">
 <segment>
 <pinref part="PSW" gate="A" pin="1"/>
-<wire x1="50.8" y1="111.76" x2="50.8" y2="101.6" width="0.1524" layer="91"/>
+<wire x1="58.42" y1="111.76" x2="58.42" y2="101.6" width="0.1524" layer="91"/>
 <wire x1="60.96" y1="58.42" x2="60.96" y2="101.6" width="0.1524" layer="91"/>
 <pinref part="ARDUINO" gate="G$1" pin="D12"/>
 <wire x1="43.18" y1="58.42" x2="60.96" y2="58.42" width="0.1524" layer="91"/>
-<wire x1="50.8" y1="101.6" x2="60.96" y2="101.6" width="0.1524" layer="91"/>
-<wire x1="50.8" y1="111.76" x2="48.26" y2="111.76" width="0.1524" layer="91"/>
-<junction x="50.8" y="111.76"/>
-<wire x1="48.26" y1="111.76" x2="48.26" y2="119.38" width="0.1524" layer="91"/>
+<wire x1="58.42" y1="101.6" x2="60.96" y2="101.6" width="0.1524" layer="91"/>
+<wire x1="58.42" y1="111.76" x2="53.34" y2="111.76" width="0.1524" layer="91"/>
+<junction x="58.42" y="111.76"/>
+<wire x1="53.34" y1="111.76" x2="53.34" y2="119.38" width="0.1524" layer="91"/>
 <pinref part="R1" gate="G$1" pin="2"/>
-<wire x1="48.26" y1="119.38" x2="45.72" y2="119.38" width="0.1524" layer="91"/>
+<wire x1="53.34" y1="119.38" x2="48.26" y2="119.38" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="N$6" class="0">
+<segment>
+<pinref part="GSM8" gate="G$1" pin="1"/>
+<pinref part="GSM8" gate="G$1" pin="3"/>
+<wire x1="152.4" y1="10.16" x2="157.48" y2="10.16" width="0.1524" layer="91"/>
+<wire x1="157.48" y1="10.16" x2="157.48" y2="5.08" width="0.1524" layer="91"/>
+<wire x1="157.48" y1="5.08" x2="152.4" y2="5.08" width="0.1524" layer="91"/>
+<junction x="152.4" y="5.08"/>
+<pinref part="GSM7" gate="G$1" pin="1"/>
+<pinref part="GSM7" gate="G$1" pin="3"/>
+<wire x1="129.54" y1="10.16" x2="134.62" y2="10.16" width="0.1524" layer="91"/>
+<wire x1="134.62" y1="10.16" x2="134.62" y2="5.08" width="0.1524" layer="91"/>
+<wire x1="134.62" y1="5.08" x2="129.54" y2="5.08" width="0.1524" layer="91"/>
+<junction x="129.54" y="5.08"/>
+<pinref part="GSM6" gate="G$1" pin="1"/>
+<pinref part="GSM6" gate="G$1" pin="3"/>
+<wire x1="106.68" y1="10.16" x2="111.76" y2="10.16" width="0.1524" layer="91"/>
+<wire x1="111.76" y1="10.16" x2="111.76" y2="5.08" width="0.1524" layer="91"/>
+<wire x1="111.76" y1="5.08" x2="106.68" y2="5.08" width="0.1524" layer="91"/>
+<junction x="106.68" y="5.08"/>
+<pinref part="GSM5" gate="G$1" pin="1"/>
+<pinref part="GSM5" gate="G$1" pin="3"/>
+<wire x1="83.82" y1="10.16" x2="88.9" y2="10.16" width="0.1524" layer="91"/>
+<wire x1="88.9" y1="10.16" x2="88.9" y2="5.08" width="0.1524" layer="91"/>
+<wire x1="88.9" y1="5.08" x2="83.82" y2="5.08" width="0.1524" layer="91"/>
+<junction x="83.82" y="5.08"/>
+<wire x1="83.82" y1="5.08" x2="83.82" y2="-12.7" width="0.1524" layer="91"/>
+<wire x1="83.82" y1="-12.7" x2="106.68" y2="-12.7" width="0.1524" layer="91"/>
+<wire x1="106.68" y1="-12.7" x2="129.54" y2="-12.7" width="0.1524" layer="91"/>
+<wire x1="129.54" y1="-12.7" x2="152.4" y2="-12.7" width="0.1524" layer="91"/>
+<wire x1="152.4" y1="-12.7" x2="170.18" y2="-12.7" width="0.1524" layer="91"/>
+<wire x1="170.18" y1="-12.7" x2="170.18" y2="20.32" width="0.1524" layer="91"/>
+<wire x1="170.18" y1="20.32" x2="177.8" y2="20.32" width="0.1524" layer="91"/>
+<pinref part="GSMPWR2" gate="-1" pin="S"/>
+<label x="175.26" y="10.16" size="1.778" layer="95" rot="R90"/>
+<wire x1="177.8" y1="20.32" x2="177.8" y2="15.24" width="0.1524" layer="91"/>
+<wire x1="106.68" y1="5.08" x2="106.68" y2="-12.7" width="0.1524" layer="91"/>
+<junction x="106.68" y="-12.7"/>
+<wire x1="129.54" y1="5.08" x2="129.54" y2="-12.7" width="0.1524" layer="91"/>
+<junction x="129.54" y="-12.7"/>
+<wire x1="152.4" y1="5.08" x2="152.4" y2="-12.7" width="0.1524" layer="91"/>
+<junction x="152.4" y="-12.7"/>
+<pinref part="JP1" gate="A" pin="2"/>
+<wire x1="187.96" y1="27.94" x2="187.96" y2="22.86" width="0.1524" layer="91"/>
+<wire x1="187.96" y1="22.86" x2="170.18" y2="22.86" width="0.1524" layer="91"/>
+<wire x1="170.18" y1="22.86" x2="170.18" y2="20.32" width="0.1524" layer="91"/>
+<junction x="170.18" y="20.32"/>
 </segment>
 </net>
 </nets>
