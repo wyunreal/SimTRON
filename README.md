@@ -46,6 +46,14 @@ The device is based on an Arduino PRO mini, running at 16 MHz and 5V. Board desi
 
 Total price: 208.35 €
 
+## Printed parts
+
+<p align="center" >
+  <img align="center" height="300" src="hardware/MicroItxCase/AtxBackPannelAntennasSupport.png">
+</p>
+
+This part has been designed to support the 8 Bnc antennas, fitting in any ATX case back side. You can print it with any 3D printer.
+
 # Firmware
 
 The firmware is under the **firmware** folder, you can use Arduino IDE to mod or add new features.
