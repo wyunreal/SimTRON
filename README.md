@@ -46,7 +46,156 @@ The device is based on an Arduino PRO mini, running at 16 MHz and 5V. Board desi
 
 Total price: 208.35 €
 
-# Burning the firmware to Arduino Pro Mini
+# Firmware
+
+The firmware is under the **firmware** folder, you can use Arduino IDE to mod or add new features.
+
+## Interface
+
+The firmware uses **Serial** interface to communicate with host computer, the commands follows a simple text protocol, one command on each line and with following structure:
+
+`commandOpCode param1 param2 param3`
+
+Commands response are valid JSON objects.
+
+### Available commands:
+
+Status command:
+
+`status channelNo`
+
+Param: int, GSM channel number, 0 to 7
+
+Response:
+
+```javascript
+{
+  "type": "status",
+  "channel": int, // the channel: 0 to 7
+  "power": "string", // whether the ATX power is "on" or "off"
+  "isEnabled": int, // whether the channel is enabled (1) or not (0)
+  "icc": "string", // full ICC of the sim, if not sim inserted, empty icc will be returned
+  "msisdn": "string", // full msisdn of the sim, if no sim inserted, empty msisdn will be returned, also, if unknown msisd, a question mark will be returned "?"
+  "networkStatus": int, // 1 to 10, indicating the GSM network status of the channel
+  "status": "string" // descriptive and printable message for networkStatus
+}
+```
+
+Catalog command:
+
+`catalog`
+
+Response:
+
+8 status objects, one per GSM channel (see status command)
+
+Enable command:
+
+`enable channelNo`
+
+Param: int, GSM channel number, 0 to 7
+
+Response:
+
+Same response than status command.
+
+Disable command:
+
+`disable channelNo`
+
+Param: int, GSM channel number, 0 to 7
+
+Response:
+
+Same response than status command.
+
+Send SMS command:
+
+`sendSms channelNo destinationMsisdn "SMS text"`
+
+Params:
+- int channelNo: GSM channel number, 0 to 7, this channel will be used as sender.
+- string senderMsisdn: MSISDN to send to.
+- string smsText: short text to send as SMS (max 130 chars)
+
+Response:
+
+if SMS sent correctly:
+
+```javascript
+{
+  "type": "info",
+  "body": "SMS sent"
+}
+```
+
+if not:
+
+```javascript
+{
+  "type": "error",
+  "body": "Error sending SMS"
+}
+```
+
+Reset command:
+
+`reset`
+
+Response:
+
+No response, the system will reset and boot messages will be shown.
+
+Support command:
+
+`support`
+
+Response:
+
+```javascript
+{
+  "type": "support",
+  "body": "Simtron v1.0.0 get support at https://github.com/wyunreal/simtron"
+}
+```
+
+## Push messages
+
+The device can send messages to the host computer without the needding of a command, these messages are:
+
+Boot started:
+
+```javascript
+{
+  "type": "booting",
+  "body": "Booting Up ..."
+}
+```
+
+Boot completed:
+
+```javascript
+{
+  "type": "booting",
+  "body": "System ready ..."
+}
+```
+
+SMS Received:
+
+```javascript
+{
+  "type": "sms",
+  "channel": int, // the channel: 0 to 7, receiver of the SMS
+  "icc": "string", // full ICC of the sim receiving the SMS
+  "msisdn": "string", // full msisdn of the sim receiving the SMS, if unknown msisd, a question mark will be returned "?"
+  "sender": "string", // sender MSISDN;
+  "datetime": "string", // a date and time string, ready for presentation
+  "body": "string" // SMS text
+}
+```
+
+## Burning the firmware to Arduino Pro Mini
 
 As the firmware enables the Watch Dog Timer, in order to being able using an Arduino Pro Mini, you need to burn the Arduino UNO bootloader first, this is completely safe as Arduino Pro Mini is a tiny but full featured version of the Arduino UNO.
 
