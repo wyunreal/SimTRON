@@ -4,7 +4,34 @@ MultiSim SMS device !
 
 This repo contains source code and hardware specifications for building a 8 SIMs communications device to monitor SMS reception on up to 8 mobile lines.
 
-# List of materials
+# Hardware
+
+The device is based on an Arduino PRO mini, running at 16 MHz and 5V. Board designed using Eagle Cad, sources under **hardware** folder.
+
+## Schematic:
+
+<p align="center" >
+  <img align="center" height="500" src="hardware/Schematic.png">
+</p>
+
+## Board:
+
+<p align="center" >
+  <img align="center" height="500" src="hardware/mainTop.png">
+</p>
+
+## Connections:
+
+- **PSW:** power switch, connect the ATX power switch.
+- **RSW:** reset switch, connect the ATX reset switch.
+- **ATXE:** ATX enable signal, connect, from left to right: ATX Black (GND), ATX Green (Enable)
+- **LPWR:** Logic power: connect, from left to right: ATX Purple (5V SB), ATX Black (GND)
+- **GSMPWR:** GSM modules [1 to 4] power: connect, from left to right: ATX Red (5V), ATX Black (GND)
+- **GSMPWR2:** GSM modules [5 to 8] power: connect, from left to right: Any alternative 5V poser supply (can be ATX Yellow (12V) through a 5V DC-DC step down, ATX Black (GND)
+-- Take into account that you don't need to connect this power connector if you closes the JP1 jumper. In this case, all GSM modules will be powered through GSMPWR connector.
+- **GSM[1..8]:** gsm modules, take into account polarity, reset pin on GSM module marked as 7 in board.
+
+## List of materials
 
 | Name | link | Unit price | Quantity | Total price |
 |------|------|------------|----------|-------------|
