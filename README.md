@@ -60,7 +60,7 @@ Commands response are valid JSON objects.
 
 ### Available commands:
 
-Status command:
+**Status command:**
 
 `status channelNo`
 
@@ -81,7 +81,7 @@ Response:
 }
 ```
 
-Catalog command:
+**Catalog command:**
 
 `catalog`
 
@@ -89,7 +89,7 @@ Response:
 
 8 status objects, one per GSM channel (see status command)
 
-Enable command:
+**Enable command:**
 
 `enable channelNo`
 
@@ -99,7 +99,7 @@ Response:
 
 Same response than status command.
 
-Disable command:
+**Disable command:**
 
 `disable channelNo`
 
@@ -109,7 +109,7 @@ Response:
 
 Same response than status command.
 
-Send SMS command:
+**Send SMS command:**
 
 `sendSms channelNo destinationMsisdn "SMS text"`
 
@@ -138,7 +138,7 @@ if not:
 }
 ```
 
-Reset command:
+**Reset command:**
 
 `reset`
 
@@ -146,7 +146,7 @@ Response:
 
 No response, the system will reset and boot messages will be shown.
 
-Support command:
+**Support command:**
 
 `support`
 
@@ -163,7 +163,7 @@ Response:
 
 The device can send messages to the host computer without the needding of a command, these messages are:
 
-Boot started:
+**Boot started:**
 
 ```javascript
 {
@@ -172,7 +172,7 @@ Boot started:
 }
 ```
 
-Boot completed:
+**Boot completed:**
 
 ```javascript
 {
@@ -181,7 +181,7 @@ Boot completed:
 }
 ```
 
-SMS Received:
+**SMS Received:**
 
 ```javascript
 {
