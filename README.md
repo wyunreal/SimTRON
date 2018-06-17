@@ -11,13 +11,13 @@ The device is based on an Arduino PRO mini, running at 16 MHz and 5V. Board desi
 ## Schematic:
 
 <p align="center" >
-  <img align="center" height="500" src="hardware/Schematic.png">
+  <img align="center" height="500" src="hardware/PCB/Schematic.png">
 </p>
 
 ## Board:
 
 <p align="center" >
-  <img align="center" height="500" src="hardware/mainTop.png">
+  <img align="center" height="500" src="hardware/PCB/mainTop.png">
 </p>
 
 ## Connections:
